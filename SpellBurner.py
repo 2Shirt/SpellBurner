@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.12a
+# Version 0.13a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -203,6 +203,25 @@ def roundMath(x):
 		return floor(x)
 
 class Facet():
+	def reset(self, *args):
+		self.actions.set('0')
+		self.ob.set('0')
+		self.option.set('')
+		self.type.set(self.default)
+		self.optionSelect['values'] = []
+		self.updateOptions()
+	
+	def destroy(self, *args):
+		try:
+			self.obCombobox.destroy()
+		except AttributeError:
+			self.obValueLabel.destroy()
+		self.typeSelect.destroy()
+		self.optionSelect.destroy()
+		self.obLabel.destroy()
+		self.actionsLabel.destroy()
+		self.actionsValueLabel.destroy()
+	
 	def updateOptions(self, *args):
 		try:
 			self.optionSelect['values'] = getFacetOptions(self.type.get())
@@ -279,6 +298,7 @@ class Facet():
 		return str(self.type.get())
 		
 	def __init__(self, frame, row, default=''):
+		self.default = default
 		self.frame = frame
 		self.row = row
 		self.actions = StringVar()
@@ -351,10 +371,30 @@ class Distiller():
 		self.updateStats()
 
 class MajorisSigil():
-	
 	def addSigil(self, *args):
 		self.addButton.destroy()
 		self.frame.addMajorisSigil()
+	
+	def destroy(self, *args):
+		self.addButton.destroy()
+		self.toggle.destroy()
+		self.obCombobox.destroy()
+		self.actionsLabel.destroy()
+		self.actionsEntry.destroy()
+	
+	def reset(self, *args):
+		self.enabled.set(False)
+		self.ob.set('')
+		self.obCombobox['values'] = ('')
+		self.obCombobox.state(['disabled'])
+		self.actionsEntry.delete(0,'end')
+		self.actionsEntry.state(['disabled'])
+		try:
+			self.addButton.destroy()
+		except:
+			pass
+		self.addButton = ttk.Button(self.frame, text='+', command=self.addSigil, width=3)
+		self.addButton.grid(column=1, row=self.row)
 	
 	def toggleSigil(self, *args):
 		if self.enabled.get():
@@ -548,9 +588,7 @@ class WeaponStats():
 
 class App(ttk.Frame):
 	def addExtraFacet(self, *args):
-		if len(self.facets[5:]) == self.extraFacetMaxRows:
-			self.extraFacetButton.destroy()
-		self.facets.append(Facet(self, self.extrafacetsMaButartRow+len(self.facets[5:])))
+		self.facets.append(Facet(self, self.extrafacetStartRow+len(self.facets[5:])))
 		
 		# Update Distiller
 		self.distiller3 = Distiller(self, 20, 'Final Distillation',
@@ -560,13 +598,37 @@ class App(ttk.Frame):
 		self.configureGrid()
 	
 	def addMajorisSigil(self, *args):
-		self.majorisStartRow = self.majorisStartRow + 1
 		if len(self.majorisSigils) < self.majorisMaxRows:
-			self.majorisSigils.append(MajorisSigil(self, self.majorisStartRow))
+			self.majorisSigils.append(MajorisSigil(self, self.majorisStartRow + len(self.majorisSigils)))
 		self.configureGrid()
 	
 	def configureGrid(self, *args):
+		try:
+			self.extraFacetButton.destroy()
+		except:
+			pass
+		if len(self.facets[5:]) < self.extraFacetMaxRows:
+			self.extraFacetButton = ttk.Button(self, text='+', command=self.addExtraFacet, width=3)
+			self.extraFacetButton.grid(column=1, row=19)
+			
 		for child in self.winfo_children(): child.grid_configure(padx=2, pady=2)
+	
+	def reset(self, *args):
+		for f in self.facets[0:5]:
+			f.reset()
+		for f in self.facets[5:]:
+			f.destroy()
+		self.facets = self.facets[0:5]
+		self.majorisSigils[0].reset()
+		for m in self.majorisSigils[1:]:
+			m.destroy()
+		self.majorisSigils = self.majorisSigils[0:1]
+		self.capValue.set(False)
+		self.minorisValue.set(0)
+		self.compressValue.set(0)
+		self.extendValue.set(0)
+		self.updateAll()
+		self.configureGrid()
 	
 	def updateAll(self, *args):
 		### Distillations ###
@@ -589,9 +651,9 @@ class App(ttk.Frame):
 		# majoris
 		self.majActTotal = 1
 		self.majObTotal = 0
-		for s in self.majorisSigils:
-			self.majObTotal += s.getOb()
-			self.majActTotal *= s.getMultiplier()
+		for m in self.majorisSigils:
+			self.majObTotal += m.getOb()
+			self.majActTotal *= m.getMultiplier()
 		# After Final Distillation
 		self.subTotalAct = roundMath(self.distiller3.getActions())
 		self.subTotalOb = roundMath(self.distiller3.getOb())
@@ -620,35 +682,36 @@ class App(ttk.Frame):
 		# Final Spell valid?
 		self.valid = True
 		
-		# Find Actions-based limits
-		self.minEs = max(0, self.numEs - floor((self.postAct - 1)/5))
-		if self.preAct > 0.5:
-			self.maxCs = min(10, ceil(log(1/self.preAct,0.5)) + self.numCs)
-		elif self.preAct == 0.5:
-			self.valid = False
-			self.maxCs = numCs - 1
-		else: #self.preAct < 0.5
-			self.valid = False
-			if self.numEs > 0:
-				self.maxCs = max(0, self.numCs - ceil(log(1/(2*self.postAct),2)))
-			else:
-				self.maxCs = max(0, self.numCs - ceil(log(1/(2*self.preAct),2)))
-		
-		# Find Ob-based limits
-		if self.preOb < 1:
-			self.valid = False
-			self.minCs = min(10, self.numCs + abs(self.preOb) + 1)
-			self.maxEs = max(0, self.numEs - abs(self.preOb) - 1)
-			self.maxMin = max(0, self.numMin - abs(self.preOb) - 1)
-		#elif self.preOb == 1:
-		#	self.maxEs = min(10, floor(self.preOb/2) + self.numEs)
-		#	self.maxMin = min(10, self.preOb - 1 + self.numMin)
-		#	self.minCs = max(0, self.numCs)
-		else: # self.preOb > 1
-			self.maxEs = min(10, floor((self.preEs)/2))
-			self.maxMin = min(10, self.preOb - 1 + self.numMin)
-			self.minCs = max(0, min(10, self.numCs - self.preOb + 1))
-		
+		if self.advanceLimits.get():
+			# Find Actions-based limits
+			self.minEs = max(0, self.numEs - floor((self.postAct - 1)/5))
+			if self.preAct > 0.5:
+				self.maxCs = min(10, ceil(log(1/self.preAct,0.5)) + self.numCs)
+			elif self.preAct == 0.5:
+				self.valid = False
+				self.maxCs = numCs - 1
+			else: #self.preAct < 0.5
+				self.valid = False
+				if self.numEs > 0:
+					self.maxCs = max(0, self.numCs - ceil(log(1/(2*self.postAct),2)))
+				else:
+					self.maxCs = max(0, self.numCs - ceil(log(1/(2*self.preAct),2)))
+			
+			# Find Ob-based limits
+			if self.preOb < 1:
+				self.valid = False
+				self.minCs = min(10, self.numCs + abs(self.preOb) + 1)
+				self.maxEs = max(0, self.numEs - abs(self.preOb) - 1)
+				self.maxMin = max(0, self.numMin - abs(self.preOb) - 1)
+			#elif self.preOb == 1:
+			#	self.maxEs = min(10, floor(self.preOb/2) + self.numEs)
+			#	self.maxMin = min(10, self.preOb - 1 + self.numMin)
+			#	self.minCs = max(0, self.numCs)
+			else: # self.preOb > 1
+				self.maxEs = min(10, floor((self.preEs)/2))
+				self.maxMin = min(10, self.preOb - 1 + self.numMin)
+				self.minCs = max(0, min(10, self.numCs - self.preOb + 1))
+			
 		# Set limits
 		if self.numCap == 0:
 			self.capValue.set(False)
@@ -707,7 +770,7 @@ class App(ttk.Frame):
 		)
 		
 		# Sigils
-		ttk.Label(self, text='Sigils').grid(column=1, row=24)
+		self.sigilsLabel = ttk.Label(self, text='Sigils').grid(column=1, row=24)
 		
 		# Adjustments - Cap & Minoris Sigil(S)		
 		self.capCheckbutton = Checkbutton(self, text='Cap', command=self.updateAll,
@@ -774,6 +837,24 @@ class App(ttk.Frame):
 	def __init__(self, master):
 		Frame.__init__(self, master)
 		self.frame = master
+		
+		# Menu Bar
+		self.advanceLimits = BooleanVar()
+		self.advanceLimits.set(True)
+		menubar = Menu(self.frame)
+		self.frame['menu'] = menubar
+		menu_file = Menu(menubar)
+		menu_settings = Menu(menubar)
+		menubar.add_cascade(menu=menu_file, label='File')
+		menubar.add_cascade(menu=menu_settings, label='Settings')
+		menu_file.add_command(label='New', command=self.reset)
+#		menu_file.add_command(label='Open...')
+		menu_file.add_command(label='Close', command=quit)
+		menu_settings.add_checkbutton(label='Advanced Limiting',
+			variable=self.advanceLimits, onvalue=True, offvalue=False,
+			command=self.updateAll
+		)
+		
 		self.capValue = BooleanVar()
 		self.capValue.set(False)
 		self.compressValue = StringVar()
@@ -784,7 +865,7 @@ class App(ttk.Frame):
 		self.minorisValue.set(0)
 		self.majorisStartRow = 26
 		self.majorisMaxRows = 10
-		self.extrafacetsMaButartRow = 11
+		self.extrafacetStartRow = 11
 		self.extraFacetMaxRows = 9
 		self.facets = []
 		self.finalOb = StringVar()
@@ -801,6 +882,7 @@ root.title('Spell Burner')
 root.iconbitmap("SpellBurner.ico")
 #root.resizable(0, 0)						# disable window resizing
 root.resizable(width=FALSE, height=FALSE)	# disable window resizing
+root.option_add('*tearOff', FALSE)
 
 app = App(root)
 app.grid(column=0, row=0, sticky=(N, W, E, S))
