@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.06a
+# Version 0.07a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -342,13 +342,6 @@ class App(ttk.Frame):
 		# Minoris Sigil(s)
 		try:
 			self.finalObValue -= int(self.minorisValue.get())
-			# Limit minoris sigil amount
-			limit = int(self.minorisValue.get()) + self.finalObValue
-			if limit < 1:
-				self.minorisCombobox['values'] = (0)
-			else:
-				self.minorisCombobox['values'] = tuple(range(int(limit)))
-			del limit
 		except ValueError:
 			pass
 		
@@ -361,17 +354,6 @@ class App(ttk.Frame):
 		try:
 			self.finalObValue -= 1*int(self.extendValue.get())
 			self.finalActionsValue *= 5**int(self.extendValue.get())
-			# Limit number of extentions
-			origOb = roundMinOne(self.distiller3.getOb())
-			minOb = roundUp(origOb / 2)
-			if self.finalObValue > minOb:
-				limit = self.finalObValue - minOb + 1 + int(self.extendValue.get())
-			else:
-				limit = int(self.extendValue.get()) + 1 # current number
-			self.extendCombobox['values'] = tuple(range(int(limit)))
-			del limit
-			del minOb
-			del origOb
 		except ValueError:
 			pass
 		
@@ -382,6 +364,59 @@ class App(ttk.Frame):
 			if curCompress > 0:
 				self.finalObValue += 1*curCompress
 				self.finalActionsValue = roundMinOne(ceil(self.finalActionsValue*(1/2)**curCompress))
+		except ValueError:
+			pass
+		
+		# Final Spell Stats
+		if self.capValue.get():
+			self.finalOb.set(roundMinOne(self.finalObValue))
+		else:
+			self.finalOb.set(str(roundMinOne(self.finalObValue)) + '^')
+		self.finalActions.set(int(self.finalActionsValue))
+		self.configureGrid()
+		
+		# Limit selection: Minoris Sigil(s)
+		origOb = roundMinOne(self.distiller3.getOb())
+		curMinoris = int(self.minorisValue.get())
+		try:
+			# Limit minoris sigil amount
+			if self.finalObValue == 1:
+				limit = curMinoris + 1
+			elif 0 < self.finalObValue <= origOb - 1 - curMinoris:
+				limit = self.finalObValue + curMinoris
+			elif origOb - 1 - curMinoris < self.finalObValue:
+				limit = origOb
+			else:
+				limit = 1 # Not sure what this case is...
+			if limit <= 0:
+				limit = 1
+			self.minorisCombobox['values'] = tuple(range(int(limit)))
+		except ValueError:
+			pass
+		del curMinoris
+		
+		# Limit selection: Extention(s)
+		try:
+			# Limit number of extentions
+			max = origOb - roundUp(origOb / 2)
+			if self.finalObValue > max:
+				limit = max + 1
+			elif self.finalObValue > 1:
+				if int(self.extendValue.get()) == max:
+					limit = max + 1
+				else:
+					limit = self.finalObValue
+			elif int(self.extendValue.get()) > 0:
+				limit = int(self.extendValue.get()) + 1
+			else:
+				limit = 1
+			self.extendCombobox['values'] = tuple(range(int(limit)))
+			del max
+		except ValueError:
+			pass
+		
+		# Limit selection: Compression(s)
+		try:
 			# Limit number of compressions
 			if self.finalActionsValue == 1:
 				if roundMinOne(self.distiller3.getActions()) == 1:
@@ -400,17 +435,11 @@ class App(ttk.Frame):
 			else:
 				limit = ceil(log(1/self.finalActionsValue, 1/2)) + 1 + curCompress
 			self.compressCombobox['values'] = tuple(range(int(limit)))
-			del limit
 		except ValueError:
 			pass
-		
-		# Final Spell Stats
-		if self.capValue.get():
-			self.finalOb.set(roundMinOne(self.finalObValue))
-		else:
-			self.finalOb.set(str(roundMinOne(self.finalObValue)) + '^')
-		self.finalActions.set(int(self.finalActionsValue))
-		self.configureGrid()
+		del limit
+		del origOb
+		del curCompress
 		
 	def createWidgets(self):
 		# 1st Distillation
