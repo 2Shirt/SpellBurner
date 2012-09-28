@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.11a
+# Version 0.12a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -487,14 +487,21 @@ class WeaponStats():
 		self.spell = {}
 		self.tmp = {}
 		for f in self.frame.facets:
-			if f.getOption == '':
-				self.enabled = False
-				break
-			try:
-				self.spell[f.getType()][f.getOption()] = 0
-			except KeyError:
+			if f.getOption() == '':
+				pass
+			elif f.getType() in self.spell:
+				if f.getOption() in self.spell[f.getType()]:
+					self.spell[f.getType()][f.getOption()] += 1
+				else:
+					self.spell[f.getType()][f.getOption()] = 1
+			else:
 				self.spell[f.getType()] = {}
-				self.spell[f.getType()][f.getOption()] = 0
+				self.spell[f.getType()][f.getOption()] = 1
+			try:
+				if self.spell[f.getType()][f.getOption()] > 1:
+					self.frame.valid = False
+			except KeyError:
+				pass
 		
 		# Enable/Disable
 		if self.enabled:
@@ -660,14 +667,16 @@ class App(ttk.Frame):
 		else:
 			self.finalOb.set(self.postOb)
 		self.finalActions.set(self.postAct)
-		if self.valid:
-			self.warningLabelText.set(' ')
-		else:
-			self.warningLabelText.set('[HOUSE RULED]')
 		
 		### Weapon Stats ###
 		self.weapon.updateStats()
 		self.configureGrid()
+		
+		### Validity ###
+		if self.valid:
+			self.warningLabelText.set(' ')
+		else:
+			self.warningLabelText.set('[HOUSE RULED]')
 		
 	def createWidgets(self):
 		# 1st Distillation
@@ -789,6 +798,7 @@ class App(ttk.Frame):
 
 root = Tk()
 root.title('Spell Burner')
+root.iconbitmap("SpellBurner.ico")
 #root.resizable(0, 0)						# disable window resizing
 root.resizable(width=FALSE, height=FALSE)	# disable window resizing
 
