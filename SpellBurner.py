@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.08a
+# Version 0.09a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -70,22 +70,17 @@ facets = {
 	},
 }
 
-def roundMinOne(x):
-	if (floor(x) == 0):
-		return 1
-	elif (x - floor(x) >= 0.5):
+def roundMath(x):
+	if (x - floor(x) >= 0.5):
 		return floor(x) + 1
 	else:
 		return floor(x)
 
-def roundDown(x):
+def roundDownMinOne(x):
 	if (floor(x) == 0):
 		return 1
 	else:
 		return floor(x)
-
-def roundUp(x):
-	return ceil(x)
 
 class Facet():
 	def updateOptions(self, *args):
@@ -173,8 +168,8 @@ class Distiller():
 					self.obTmp += y.getOb()
 					self.actionsTmp += y.getActions()
 		if self.round is 'true':
-			self.ob.set(str(roundMinOne(self.obTmp/2)))
-			self.actions.set(str(roundMinOne(self.actionsTmp/2)))
+			self.ob.set(str(roundMath(self.obTmp/2)))
+			self.actions.set(str(roundMath(self.actionsTmp/2)))
 		else:
 			self.ob.set(str(self.obTmp/2))
 			self.actions.set(str(self.actionsTmp/2))
@@ -316,14 +311,115 @@ class App(ttk.Frame):
 			self.majorisSigils.append(MajorisSigil(self, self.extraFacetRow))
 		self.configureGrid()
 	
-	def generateRange(self, limit, *args):
+	def generateRange(self, min, max, *args):
 		self.rangeList = []
-		for i in range(limit):
-			self.rangeList.append(str(i))
-		return self.rangeList
+		if min > max:
+			# Uh....
+			return [0]
+		elif min == max:
+			return [min]
+		else:
+			for i in range(min, max+1):
+				self.rangeList.append(str(i))
+			return self.rangeList
 	
 	def configureGrid(self, *args):
 		for child in self.winfo_children(): child.grid_configure(padx=2, pady=2)
+	
+	def updateSpellStats(self, *args):
+		# Init Variables
+		if self.capValue.get():
+			self.numCap = 1
+		else:
+			self.numCap = 0
+		# Compressions
+		self.numCs = int(self.compressValue.get())
+		# Extensions
+		self.numEs = int(self.extendValue.get())
+		# Minoris
+		self.numMin = int(self.minorisValue.get())
+		# majoris
+		self.majActTotal = 1
+		self.majObTotal = 0
+		for s in self.majorisSigils:
+			self.majObTotal += s.getOb()
+			self.majActTotal *= s.getMultiplier()
+		# After Final Distillation
+		self.subTotalAct = roundMath(self.distiller3.getActions())
+		self.subTotalOb = roundMath(self.distiller3.getOb())
+		# Before rounding
+		self.preAct = max(1, self.subTotalAct)*self.majActTotal*0.5**self.numCs
+		self.preOb = self.subTotalOb
+		self.preOb -= self.numCap
+		self.preOb -= self.numMin
+		self.preOb += self.majObTotal
+		self.preOb -= self.numEs
+		self.preOb += self.numCs
+		# After rounding
+		self.postAct = ceil(self.preAct)*5**self.numEs
+		self.postOb = max(1,self.preOb)
+		# current limits
+		self.maxCs = 10
+		self.minCs = 0
+		self.maxEs = 10
+		self.minEs = 0
+		self.maxMin = 10
+		self.minMin = 0
+		# Final Spell valid?
+		self.valid = True
+		
+		# Find Actions-based limits
+		self.minEs = max(0, self.numEs - floor((self.postAct - 1)/5))
+		if self.preAct > 0.5:
+			self.maxCs = min(10, ceil(log(1/self.preAct,0.5)) + self.numCs)
+		elif self.preAct == 0.5:
+			self.valid = False
+			self.maxCs = numCs - 1
+		else: #self.preAct < 0.5
+			self.valid = False
+			if self.numEs > 0:
+				self.maxCs = max(0, self.numCs - ceil(log(1/(2*self.postAct),2)))
+			else:
+				self.maxCs = max(0, self.numCs - ceil(log(1/(2*self.preAct),2)))
+		
+		# Find Ob-based limits
+		if self.preOb < 1:
+			self.valid = False
+			self.minCs = min(10, self.numCs + abs(self.preOb) + 1)
+			self.maxEs = max(0, self.numEs - abs(self.preOb) - 1)
+			self.maxMin = max(0, self.numMin - abs(self.preOb) - 1)
+		elif self.preOb == 1:
+			self.maxEs = min(10, self.preOb - ceil(self.subTotalOb/2) + self.numEs)
+			self.maxMin = min(10, self.preOb - 1 + self.numMin)
+			self.minCs = max(0, self.numCs)
+		else: # self.preOb > 1
+			self.maxEs = min(10, self.preOb - ceil(self.subTotalOb/2) + self.numEs)
+			self.maxMin = min(10, self.preOb - 1 + self.numMin)
+			self.minCs = max(0, min(10, self.numCs - self.preOb + 1))
+		
+		# Set limits
+		if self.numCap == 0:
+			self.capValue.set(False)
+		self.minorisCombobox['values'] = self.generateRange(self.minMin, self.maxMin)
+		self.compressCombobox['values'] = self.generateRange(self.minCs, self.maxCs)
+		self.extendCombobox['values'] = self.generateRange(self.minEs, self.maxEs)
+		
+		# Misc Checks
+		if self.preOb < ceil(self.subTotalOb/2):
+			if self.numEs > self.preOb - ceil(self.subTotalOb/2) + self.numEs >= 0:
+				self.valid = False
+		
+		# Set Stats
+		if self.numCap == 0:
+			self.finalOb.set(str(self.postOb) + '^')
+		else:
+			self.finalOb.set(self.postOb)
+		self.finalActions.set(self.postAct)
+		if self.valid:
+			self.warningLabelText.set(' ')
+		else:
+			self.warningLabelText.set('[HOUSE RULED]')
+		self.configureGrid()
 	
 	def updateAll(self, *args):
 		# Distillations
@@ -331,116 +427,8 @@ class App(ttk.Frame):
 		self.distiller2.updateStats()
 		self.distiller3.updateStats()
 		
-		# After Final Distillation
-		self.finalObValue = roundMinOne(self.distiller3.getOb())
-		self.finalActionsValue = roundMinOne(self.distiller3.getActions())
-		
-		# Cap Sigil
-		if self.capValue.get():
-			self.finalObValue -= 1
-		
-		# Minoris Sigil(s)
-		try:
-			self.finalObValue -= int(self.minorisValue.get())
-		except ValueError:
-			pass
-		
-		# Majoris Sigil(s)
-		for s in self.majorisSigils:
-			self.finalObValue += s.getOb()
-			self.finalActionsValue *= s.getMultiplier()
-		
-		# Extention(s)
-		try:
-			self.finalObValue -= 1*int(self.extendValue.get())
-			self.finalActionsValue *= 5**int(self.extendValue.get())
-		except ValueError:
-			pass
-		
-		# Compression(s)
-		cTest = self.finalActionsValue
-		curCompress = int(self.compressValue.get())
-		try:
-			if curCompress > 0:
-				self.finalObValue += 1*curCompress
-				self.finalActionsValue = roundMinOne(ceil(self.finalActionsValue*(1/2)**curCompress))
-		except ValueError:
-			pass
-		
-		# Final Spell Stats
-		if self.capValue.get():
-			self.finalOb.set(roundMinOne(self.finalObValue))
-		else:
-			self.finalOb.set(str(roundMinOne(self.finalObValue)) + '^')
-		self.finalActions.set(int(self.finalActionsValue))
-		self.configureGrid()
-		
-		# Limit selection: Minoris Sigil(s)
-		# max reduction: Ob 1
-		origOb = roundMinOne(self.distiller3.getOb())
-		curMinoris = int(self.minorisValue.get())
-		try:
-			if self.finalObValue == 1:
-				limit = curMinoris + 1
-			elif 0 < self.finalObValue <= origOb - 1 - curMinoris:
-				limit = self.finalObValue + curMinoris
-			elif origOb - 1 - curMinoris < self.finalObValue:
-				limit = origOb
-			else:
-				limit = 1 # Not sure what this case is...
-			if limit <= 0:
-				limit = 1
-			self.minorisCombobox['values'] = tuple(range(int(limit)))
-		except ValueError:
-			pass
-		del curMinoris
-		
-		# Limit selection: Extention(s)
-		# max reduction: half orig Ob (round up)
-		try:
-			max = origOb - roundUp(origOb / 2)
-			if self.finalObValue > max:
-				limit = max + 1
-			elif self.finalObValue > 1:
-				if int(self.extendValue.get()) == max:
-					limit = max + 1
-				else:
-					limit = self.finalObValue
-			elif int(self.extendValue.get()) > 0:
-				limit = int(self.extendValue.get()) + 1
-			else:
-				limit = 1
-			self.extendCombobox['values'] = tuple(range(int(limit)))
-			del max
-		except ValueError:
-			pass
-		
-		# Limit selection: Compression(s)
-		# max reduction: Ob 1
-		
-		try:
-			if self.finalActionsValue == 1:
-				if roundMinOne(self.distiller3.getActions()) == 1:
-					limit = 1
-				else:
-					for x in range(curCompress+1):
-						cTest = ceil(cTest/2)
-						#print('cTest (', x, ') ', cTest)
-						if cTest == 1:
-							#print('\tSet limit: ', x + 2)
-							limit = x + 2
-							break
-						else:
-							# VERY WRONG, SHOULDN'T HAPPEN
-							limit = 1
-			else:
-				limit = ceil(log(1/self.finalActionsValue, 1/2)) + 1 + curCompress
-			self.compressCombobox['values'] = tuple(range(int(limit)))
-		except ValueError:
-			pass
-		del limit
-		del origOb
-		del curCompress
+		# Final Spell
+		self.updateSpellStats()
 		
 	def createWidgets(self):
 		# 1st Distillation
@@ -500,7 +488,7 @@ class App(ttk.Frame):
 		self.compressCombobox.bind('<<ComboboxSelected>>', self.updateAll)
 		self.compressCombobox.grid(column=3, row=36, sticky=W)
 		
-		self.extendLabel = ttk.Label(self, text='Extentions')
+		self.extendLabel = ttk.Label(self, text='Extensions')
 		self.extendLabel.grid(column=4, row=36, sticky=W)
 		
 		self.extendCombobox = ttk.Combobox(self, textvariable=self.extendValue, width=2)
@@ -511,6 +499,11 @@ class App(ttk.Frame):
 		
 		# Final Spell Results
 		ttk.Separator(self, orient=HORIZONTAL).grid(column=1, row=37, columnspan=8, sticky=(W, E))
+		
+		self.warningLabelText = StringVar()
+		self.warningLabelText.set(' ')
+		self.warningLabel = ttk.Label(self, textvariable=self.warningLabelText, justify='right')
+		self.warningLabel.grid(column=1, row=38, columnspan=2, sticky=(W, E))
 		
 		self.titleLabel = ttk.Label(self, text='Final Spell Stats', justify='right')
 		self.titleLabel.grid(column=4, row=38, sticky=(W, E))
