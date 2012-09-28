@@ -1,14 +1,14 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.01a
+# Version 0.02a
 from tkinter import *
 from tkinter import ttk
 
 facets = {
 	'Elements': {
 		'Air': {'Actions': 4, 'Ob': 2, 'ResCost': 10},
-		'Anima*': {'Actions': 5, 'Ob': 0, 'ResCost': 12},
+		'Anima (Target)': {'Actions': 5, 'Ob': 0, 'ResCost': 12},
 		'Anima': {'Actions': 5, 'Ob': 5, 'ResCost': 12},
 		'Arcana': {'Actions': 10, 'Ob': 4, 'ResCost': 13},
 		'Earth': {'Actions': 6, 'Ob': 1, 'ResCost': 8},
@@ -25,12 +25,12 @@ facets = {
 		'Enhance': {'Actions': 12, 'Ob': 4, 'ResCost': 4},
 		'Influence': {'Actions': 4, 'Ob': 3, 'ResCost': 3},
 		'Tax': {'Actions': 1, 'Ob': 1, 'ResCost': 2},
-		'Transmute (To Control)': {'Actions': 25, 'Ob': 8, 'ResCost': 7},
-		'Transmute (To Create)': {'Actions': 25, 'Ob': 9, 'ResCost': 7},
-		'Transmute (To Destroy)': {'Actions': 25, 'Ob': 5, 'ResCost': 7},
-		'Transmute (To Enhance)': {'Actions': 25, 'Ob': 7, 'ResCost': 7},
-		'Transmute (To Influence)': {'Actions': 25, 'Ob': 6, 'ResCost': 7},
-		'Transmute (To Tax)': {'Actions': 25, 'Ob': 4, 'ResCost': 7},
+		'Transmute (Control)': {'Actions': 25, 'Ob': 8, 'ResCost': 7},
+		'Transmute (Create)': {'Actions': 25, 'Ob': 9, 'ResCost': 7},
+		'Transmute (Destroy)': {'Actions': 25, 'Ob': 5, 'ResCost': 7},
+		'Transmute (Enhance)': {'Actions': 25, 'Ob': 7, 'ResCost': 7},
+		'Transmute (Influence)': {'Actions': 25, 'Ob': 6, 'ResCost': 7},
+		'Transmute (Tax)': {'Actions': 25, 'Ob': 4, 'ResCost': 7},
 	},
 
 	'Origins': {
@@ -56,17 +56,17 @@ facets = {
 		'Caster': {'Actions': 1, 'Ob': 0, 'ResCost': 0},
 		'Single Target': {'Actions': 2, 'Ob': 1, 'ResCost': 2},
 		'Presence': {'Actions': 3, 'Ob': 2, 'ResCost': 3},
-		'1/2 Presence': {'Actions': 3, 'Ob': 1, 'ResCost': 2},
-		'2x Presence': {'Actions': 6, 'Ob': 4, 'ResCost': 4},
+		'Half Presence': {'Actions': 3, 'Ob': 1, 'ResCost': 2},
+		'Double Presence': {'Actions': 6, 'Ob': 4, 'ResCost': 4},
 		'Natural Effect': {'Actions': 4, 'Ob': 3, 'ResCost': 4},
-		'1/2 Natural Effect': {'Actions': 3, 'Ob': 2, 'ResCost': 3},
-		'2x Natural Effect': {'Actions': 8, 'Ob': 6, 'ResCost': 8},
-		'Measured Area (Paces)': {'Actions': 4, 'Ob': 2, 'ResCost': 3},
-		'Measured Area (Tens of Paces)': {'Actions': 6, 'Ob': 4, 'ResCost': 5},
-		'Measured Area (Hundreds of Paces)': {'Actions': 8, 'Ob': 6, 'ResCost': 6},
-		'Measured Area (Miles)': {'Actions': 10, 'Ob': 8, 'ResCost': 8},
-		'Measured Area (Tens of Miles)': {'Actions': 15, 'Ob': 9, 'ResCost': 9},
-		'Measured Area (Hundreds of Miles)': {'Actions': 20, 'Ob': 10, 'ResCost': 10},
+		'Half Natural Effect': {'Actions': 3, 'Ob': 2, 'ResCost': 3},
+		'Double Natural Effect': {'Actions': 8, 'Ob': 6, 'ResCost': 8},
+		'Area (Paces)': {'Actions': 4, 'Ob': 2, 'ResCost': 3},
+		'Area (Tens of Paces)': {'Actions': 6, 'Ob': 4, 'ResCost': 5},
+		'Area (Hundreds of Paces)': {'Actions': 8, 'Ob': 6, 'ResCost': 6},
+		'Area (Miles)': {'Actions': 10, 'Ob': 8, 'ResCost': 8},
+		'Area (Tens of Miles)': {'Actions': 15, 'Ob': 9, 'ResCost': 9},
+		'Area (Hundreds of Miles)': {'Actions': 20, 'Ob': 10, 'ResCost': 10},
 	},
 }
 
@@ -76,22 +76,19 @@ class Facet(ttk.Frame):
 	def updateStats(self, *args):
 		self.ob.set(facets[self.type.get()][self.option.get()]['Ob'])
 		self.actions.set(facets[self.type.get()][self.option.get()]['Actions'])
+		self.parent.updateAll()
 		
 	def createWidgets(self):
-		self.typeFrame = ttk.Labelframe(self, text='Type')
-		self.typeFrame.grid(column=1, row=1, sticky=W)
-		self.typeSelect = ttk.Combobox(self.typeFrame, textvariable=self.type)
+		self.typeSelect = ttk.Combobox(self, textvariable=self.type)
 		self.typeSelect['values'] = sorted(facets.keys())
 		self.typeSelect.state(['readonly'])
 		self.typeSelect.bind('<<ComboboxSelected>>', self.updateOptions)
 		self.typeSelect.grid(column=1, row=1, sticky=W)
 		
-		self.optionFrame = ttk.Labelframe(self, text='Option')
-		self.optionFrame.grid(column=2, row=1, sticky=W)
-		self.optionSelect = ttk.Combobox(self.optionFrame, textvariable=self.option)
+		self.optionSelect = ttk.Combobox(self, textvariable=self.option)
 		self.optionSelect.state(['readonly'])
 		self.optionSelect.bind('<<ComboboxSelected>>', self.updateStats)
-		self.optionSelect.grid(column=1, row=1, sticky=W)
+		self.optionSelect.grid(column=2, row=1, sticky=W)
 		
 		self.obFrame = ttk.Labelframe(self, text='Ob')
 		self.obFrame.grid(column=3, row=1, sticky=W)
@@ -104,24 +101,125 @@ class Facet(ttk.Frame):
 		self.actionsLabel.grid(column=1, row=1, sticky=W)
 
 	def getActions(self):
-		return self.actions
+		return float(self.actions.get())
 
 	def getOb(self):
-		return self.ob
+		return float(self.ob.get())
 		
 	def __init__(self, master):
 		Frame.__init__(self, master)
 		self.parent = master
 		self.actions = StringVar()
+		self.actions.set('0')
 		self.ob = StringVar()
+		self.ob.set('0')
 		self.option = StringVar()
 		self.type = StringVar()
 		self.createWidgets()
+		for child in self.winfo_children(): child.grid_configure(padx=5, pady=0)
+
+class Distiller(ttk.Frame):
+	def updateStats(self, *args):
+		self.obTmp = 0
+		self.actionsTmp = 0
+		for x in self.tobedistilled:
+#			print(x.getOb())
+#			print(x.getActions())
+			self.obTmp += x.getOb()
+			self.actionsTmp += x.getActions()
+#			print(self.obTmp)
+#			print(self.actionsTmp)
+		self.ob.set(str(self.obTmp/2))
+		self.actions.set(str(self.actionsTmp/2))
+#		print(self.ob)
+#		print(self.actions)
+#		print('----------------------')
+	
+	def createWidgets(self):
+		self.titleLabel = ttk.Label(self, text=self.title, justify='right')
+		self.titleLabel.grid(column=1, row=1, columnspan=2, sticky=W)
 		
+		self.obFrame = ttk.Labelframe(self, text='Ob')
+		self.obFrame.grid(column=3, row=1, sticky=W)
+		self.obLabel = ttk.Label(self.obFrame, textvariable=self.ob)
+		self.obLabel.grid(column=1, row=1, sticky=W)
+		
+		self.actionsFrame = ttk.Labelframe(self, text='Actions')
+		self.actionsFrame.grid(column=4, row=1, sticky=W)
+		self.actionsLabel = ttk.Label(self.actionsFrame, textvariable=self.actions)
+		self.actionsLabel.grid(column=1, row=1, sticky=W)
+
+	def getActions(self):
+		return float(self.actions.get())
+
+	def getOb(self):
+		return float(self.ob.get())
+	
+	def __init__(self, master, title, tobedistilled, *args):
+		Frame.__init__(self, master)
+		self.parent = master
+		self.title = title
+		self.tobedistilled = tobedistilled
+		self.actions = StringVar()
+		self.ob = StringVar()
+		self.createWidgets()
+		self.updateStats()
+		for child in self.winfo_children(): child.grid_configure(padx=5, pady=0)
+
+class App(ttk.Frame):
+	def updateAll(self, *args):
+		self.distiller1.updateStats()
+		self.distiller2.updateStats()
+		self.distiller3.updateStats()
+		
+	def createWidgets(self):
+		self.facet1 = Facet(self)
+		self.facet1.grid(column=1, row=1, sticky=W)
+		self.facet2 = Facet(self)
+		self.facet2.grid(column=1, row=2, sticky=W)
+		
+		self.distiller1 = Distiller(self, '1st Distillation',
+			(self.facet1, self.facet2)
+		)
+		self.distiller1.grid(column=1, row=3, sticky=W)
+		
+		self.facet3 = Facet(self)
+		self.facet3.grid(column=1, row=4, sticky=W)
+		self.facet4 = Facet(self)
+		self.facet4.grid(column=1, row=5, sticky=W)
+		
+		self.distiller2 = Distiller(self, '2nd Distillation',
+			(self.facet3, self.facet4)
+		)
+		self.distiller2.grid(column=1, row=6, sticky=W)
+		
+		self.facet5 = Facet(self)
+		self.facet5.grid(column=1, row=7, sticky=W)
+		self.facet6 = Facet(self)
+		self.facet6.grid(column=1, row=8, sticky=W)
+		self.facet7 = Facet(self)
+		self.facet7.grid(column=1, row=9, sticky=W)
+		
+		self.distiller3 = Distiller(self, 'Final Distillation',
+			(self.distiller1, self.distiller2, self.facet5, self.facet6, self.facet7)
+		)
+		self.distiller3.grid(column=1, row=10, sticky=W)
+		
+	def __init__(self, master):
+		Frame.__init__(self, master)
+		self.parent = master
+		self.createWidgets()
+		self.updateAll()
+		for child in self.winfo_children(): child.grid_configure(padx=5, pady=2)
 
 root = Tk()
-facet1 = Facet(root)
-facet1.grid(column=1, row=1, sticky=W)
+root.title('Spell Burner')
+
+app = App(root)
+app.grid(column=0, row=0, sticky=(N, W, E, S))
+app.columnconfigure(0, weight=1)
+app.rowconfigure(0, weight=1)
+
 root.mainloop()
 
 
