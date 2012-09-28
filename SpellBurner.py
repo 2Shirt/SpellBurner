@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.07a
+# Version 0.08a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -376,10 +376,10 @@ class App(ttk.Frame):
 		self.configureGrid()
 		
 		# Limit selection: Minoris Sigil(s)
+		# max reduction: Ob 1
 		origOb = roundMinOne(self.distiller3.getOb())
 		curMinoris = int(self.minorisValue.get())
 		try:
-			# Limit minoris sigil amount
 			if self.finalObValue == 1:
 				limit = curMinoris + 1
 			elif 0 < self.finalObValue <= origOb - 1 - curMinoris:
@@ -396,8 +396,8 @@ class App(ttk.Frame):
 		del curMinoris
 		
 		# Limit selection: Extention(s)
+		# max reduction: half orig Ob (round up)
 		try:
-			# Limit number of extentions
 			max = origOb - roundUp(origOb / 2)
 			if self.finalObValue > max:
 				limit = max + 1
@@ -416,8 +416,9 @@ class App(ttk.Frame):
 			pass
 		
 		# Limit selection: Compression(s)
+		# max reduction: Ob 1
+		
 		try:
-			# Limit number of compressions
 			if self.finalActionsValue == 1:
 				if roundMinOne(self.distiller3.getActions()) == 1:
 					limit = 1
@@ -559,67 +560,3 @@ app.columnconfigure(0, weight=1)
 app.rowconfigure(0, weight=1)
 
 root.mainloop()
-
-
-#=Element=
-#Name	Ob	Act	Res
-#Air		2	4	10
-#Anima*	0	5	12 # Ob = Target Stat
-#Anima	5	5	12
-#Arcana	4	10	13
-#Earth	1	6	8
-#Fire	2	5	10
-#Heaven	3	8	10
-#Water	2	3	9
-#White	4	7	11
-
-#=Impetus=
-#Name			Ob	Act	Res
-#Control			5	16	5
-#Create			6	32	6
-#Destroy			2	2	3
-#Enhance			4	12	4
-#Influence		3	4	3
-#Tax				1	1	2
-#Transmute-Cntl	8	25	7
-#Transmute-Crea	9	25	7
-#Transmute-Dstr	5	25	7
-#Transmute-Enhc	7	25	7
-#Transmute-Infl	6	25	7
-#Transmute-Tax	4	25	7
-
-#=Origin=
-#Name		Ob	Act	Res
-#Personal	0	1	0
-#Presence	2	2	2
-#Sight		4	4	4
-
-#=Duration=
-#Name			Ob	Act	Res
-#Instantaneous	0	1	0
-#Sustained		2	2	2
-#E.Time-Seconds	1	2	2
-#E.TimeExchanges	2	6	4
-#E.Time-Minutes	3	8	5
-#E.Time-Hours	4	12	7
-#E.Time-Days		5	24	8
-#E.Time-Months	7	43	9
-#E.Time-Years	9	81	10
-#Permanent		10	500	100
-
-#=Area of Effect=
-#Name				Ob	Act	Res
-#Caster				0	1	0
-#Single Target		1	2	2
-#Presence			2	3	3
-#1/2 Presence		1	3	2
-#2x Presence			4	6	4
-#Natural Effect		3	4	4
-#1/2 Natural Ef.		2	3	3
-#2x Natural Eff.		6	8	8
-#M.Area-Paces		2	4	3
-#M.Area-Paces (10s)	4	6	5
-#M.Area-Paces (100s)	6	8	6
-#M.Area-Miles		8	10	8
-#M.Area-Miles (10s)	9	15	9
-#M.Area-Miles (100s)	10	20	10
