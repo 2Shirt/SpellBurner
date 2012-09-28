@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.03a
+# Version 0.04a
 from tkinter import *
 from tkinter import ttk
 from math import floor
@@ -70,7 +70,7 @@ facets = {
 	},
 }
 
-def roundBW(x):
+def roundMinOne(x):
 	if (floor(x) == 0):
 		return 1
 	elif (x - floor(x) >= 0.5):
@@ -96,7 +96,6 @@ class Facet(ttk.Frame):
 		
 	def updateStats(self, *args):
 		if self.option.get() == 'Anima':
-			## Todo ##
 			try:
 				self.obLabel.destroy()
 			except AttributeError:
@@ -130,7 +129,7 @@ class Facet(ttk.Frame):
 		self.optionSelect.bind('<<ComboboxSelected>>', self.updateStats)
 		self.optionSelect.grid(column=2, row=1, sticky=W)
 		
-		self.obFrame = ttk.Labelframe(self, text='Ob')
+		self.obFrame = ttk.Labelframe(self, text='Ob', width=30)
 		self.obFrame.grid(column=3, row=1, sticky=W)
 		self.obLabel = ttk.Label(self.obFrame, textvariable=self.ob)
 		self.obLabel.grid(column=1, row=1, sticky=W)
@@ -168,8 +167,8 @@ class Distiller(ttk.Frame):
 			self.obTmp += x.getOb()
 			self.actionsTmp += x.getActions()
 		if self.round is 'true':
-			self.ob.set(str(roundBW(self.obTmp/2)))
-			self.actions.set(str(roundBW(self.actionsTmp/2)))
+			self.ob.set(str(roundMinOne(self.obTmp/2)))
+			self.actions.set(str(roundMinOne(self.actionsTmp/2)))
 		else:
 			self.ob.set(str(self.obTmp/2))
 			self.actions.set(str(self.actionsTmp/2))
@@ -223,19 +222,15 @@ class MajorisSigil(ttk.Frame):
 	def validateMultiplier(self, *args):
 		try:
 			if (float(self.actionsEntry.get()) < 10):
-				print('<10')
 				self.actionsEntry.delete(0,'end')
 				self.actionsEntry.insert(0, '10')
 			elif (float(self.actionsEntry.get()) > 100):
-				print('>100')
 				self.actionsEntry.delete(0,'end')
 				self.actionsEntry.insert(0, '100')
 		except ValueError:
-			print('ValueError')
 			self.actionsEntry.delete(0,'end')
 			self.actionsEntry.insert(0, '10')
 		except TypeError:
-			print('TypeError')
 			self.actionsEntry.delete(0,'end')
 			self.actionsEntry.insert(0, '10')
 		return 1
@@ -300,8 +295,9 @@ class App(ttk.Frame):
 		self.distiller2.updateStats()
 		self.distiller3.updateStats()
 		#Final Spell
+		# ToDO
 		#self.capValue
-#		self.minorisCombobox['values'] # set current limit
+		#self.minorisCombobox['values'] # set current limit
 		
 	def createWidgets(self):
 		# 1st Distillation
@@ -387,6 +383,9 @@ class App(ttk.Frame):
 		self.extendCombobox['values'] = ('0')
 #		self.extendCombobox.bind('<<ComboboxSelected>>', self.updateStats)
 		self.extendCombobox.grid(column=4, row=1, sticky=W)
+		
+		# Final Spell Results
+		# ToDO
 		
 	def __init__(self, master):
 		Frame.__init__(self, master)
