@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.13a
+# Version 0.14a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -547,6 +547,7 @@ class WeaponStats():
 		if self.enabled:
 			if len(self.spell) < 5:
 				self.enabled = False
+				self.frame.complete = False
 			else:
 				if not('Destroy' in self.spell['Impetus']):
 					self.enabled = False
@@ -570,6 +571,13 @@ class WeaponStats():
 				self.wVA.set(str(max(0,self.tmp['VA'] + self.frame.majObTotal - self.frame.numMin)))
 			else:
 				self.enabled = False
+		
+		# Check for Anime+Create
+		#    I know this should be somewhere else in the code...
+		if self.frame.complete:
+			if 'Anima' in self.spell['Element']:
+				if 'Create' in self.spell['Impetus']:
+					self.frame.valid = False
 		
 		# Update display
 		self.updateDisplay()
@@ -681,6 +689,7 @@ class App(ttk.Frame):
 		self.minMin = 0
 		# Final Spell valid?
 		self.valid = True
+		self.complete = True
 		
 		if self.advanceLimits.get():
 			# Find Actions-based limits
@@ -735,9 +744,12 @@ class App(ttk.Frame):
 		self.weapon.updateStats()
 		self.configureGrid()
 		
-		### Validity ###
+		### Warnings ###
 		if self.valid:
-			self.warningLabelText.set(' ')
+			if self.complete:
+				self.warningLabelText.set(' ')
+			else:
+				self.warningLabelText.set('[Incomplete]')
 		else:
 			self.warningLabelText.set('[HOUSE RULED]')
 		
