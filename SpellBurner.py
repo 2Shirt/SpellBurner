@@ -1,72 +1,72 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.05a
+# Version 0.06a
 from tkinter import *
 from tkinter import ttk
-from math import floor
+from math import ceil, floor, log
 
 facets = {
 	'Element': {
-		'Air': {'Actions': 4, 'Ob': 2, 'ResCost': 10},
-		'Anima': {'Actions': 5, 'Ob': 5, 'ResCost': 12},
-		'Arcana': {'Actions': 10, 'Ob': 4, 'ResCost': 13},
-		'Earth': {'Actions': 6, 'Ob': 1, 'ResCost': 8},
-		'Fire': {'Actions': 5, 'Ob': 2, 'ResCost': 10},
-		'Heaven': {'Actions': 8, 'Ob': 3, 'ResCost': 10},
-		'Water': {'Actions': 3, 'Ob': 2, 'ResCost': 9},
-		'White': {'Actions': 7, 'Ob': 4, 'ResCost': 11},
+		'Air': {'Actions:': 4, 'Ob': 2, 'ResCost': 10},
+		'Anima': {'Actions:': 5, 'Ob': 5, 'ResCost': 12},
+		'Arcana': {'Actions:': 10, 'Ob': 4, 'ResCost': 13},
+		'Earth': {'Actions:': 6, 'Ob': 1, 'ResCost': 8},
+		'Fire': {'Actions:': 5, 'Ob': 2, 'ResCost': 10},
+		'Heaven': {'Actions:': 8, 'Ob': 3, 'ResCost': 10},
+		'Water': {'Actions:': 3, 'Ob': 2, 'ResCost': 9},
+		'White': {'Actions:': 7, 'Ob': 4, 'ResCost': 11},
 	},
 
 	'Impetus': {
-		'Control': {'Actions': 16, 'Ob': 5, 'ResCost': 5},
-		'Create': {'Actions': 32, 'Ob': 6, 'ResCost': 6},
-		'Destroy': {'Actions': 2, 'Ob': 2, 'ResCost': 3},
-		'Enhance': {'Actions': 12, 'Ob': 4, 'ResCost': 4},
-		'Influence': {'Actions': 4, 'Ob': 3, 'ResCost': 3},
-		'Tax': {'Actions': 1, 'Ob': 1, 'ResCost': 2},
-		'Transmute (Control)': {'Actions': 25, 'Ob': 8, 'ResCost': 7},
-		'Transmute (Create)': {'Actions': 25, 'Ob': 9, 'ResCost': 7},
-		'Transmute (Destroy)': {'Actions': 25, 'Ob': 5, 'ResCost': 7},
-		'Transmute (Enhance)': {'Actions': 25, 'Ob': 7, 'ResCost': 7},
-		'Transmute (Influence)': {'Actions': 25, 'Ob': 6, 'ResCost': 7},
-		'Transmute (Tax)': {'Actions': 25, 'Ob': 4, 'ResCost': 7},
+		'Control': {'Actions:': 16, 'Ob': 5, 'ResCost': 5},
+		'Create': {'Actions:': 32, 'Ob': 6, 'ResCost': 6},
+		'Destroy': {'Actions:': 2, 'Ob': 2, 'ResCost': 3},
+		'Enhance': {'Actions:': 12, 'Ob': 4, 'ResCost': 4},
+		'Influence': {'Actions:': 4, 'Ob': 3, 'ResCost': 3},
+		'Tax': {'Actions:': 1, 'Ob': 1, 'ResCost': 2},
+		'Transmute (Control)': {'Actions:': 25, 'Ob': 8, 'ResCost': 7},
+		'Transmute (Create)': {'Actions:': 25, 'Ob': 9, 'ResCost': 7},
+		'Transmute (Destroy)': {'Actions:': 25, 'Ob': 5, 'ResCost': 7},
+		'Transmute (Enhance)': {'Actions:': 25, 'Ob': 7, 'ResCost': 7},
+		'Transmute (Influence)': {'Actions:': 25, 'Ob': 6, 'ResCost': 7},
+		'Transmute (Tax)': {'Actions:': 25, 'Ob': 4, 'ResCost': 7},
 	},
 
 	'Origin': {
-		'Personal': {'Actions': 1, 'Ob': 0, 'ResCost': 0},
-		'Presence': {'Actions': 2, 'Ob': 2, 'ResCost': 2},
-		'Sight': {'Actions': 4, 'Ob': 4, 'ResCost': 4},
+		'Personal': {'Actions:': 1, 'Ob': 0, 'ResCost': 0},
+		'Presence': {'Actions:': 2, 'Ob': 2, 'ResCost': 2},
+		'Sight': {'Actions:': 4, 'Ob': 4, 'ResCost': 4},
 	},
 
 	'Duration': {
-		'Instantaneous': {'Actions': 1, 'Ob': 0, 'ResCost': 0},
-		'Sustained': {'Actions': 2, 'Ob': 2, 'ResCost': 2},
-		'Elapsed Time (Seconds)': {'Actions': 2, 'Ob': 1, 'ResCost': 2},
-		'Elapsed Time (Exchanges)': {'Actions': 6, 'Ob': 2, 'ResCost': 4},
-		'Elapsed Time (Minutes)': {'Actions': 8, 'Ob': 3, 'ResCost': 5},
-		'Elapsed Time (Hours)': {'Actions': 12, 'Ob': 4, 'ResCost': 7},
-		'Elapsed Time (Days)': {'Actions': 24, 'Ob': 5, 'ResCost': 8},
-		'Elapsed Time (Months)': {'Actions': 43, 'Ob': 7, 'ResCost': 9},
-		'Elapsed Time (Years)': {'Actions': 81, 'Ob': 9, 'ResCost': 10},
-		'Permanent': {'Actions': 500, 'Ob': 10, 'ResCost': 100},
+		'Instantaneous': {'Actions:': 1, 'Ob': 0, 'ResCost': 0},
+		'Sustained': {'Actions:': 2, 'Ob': 2, 'ResCost': 2},
+		'Elapsed Time (Seconds)': {'Actions:': 2, 'Ob': 1, 'ResCost': 2},
+		'Elapsed Time (Exchanges)': {'Actions:': 6, 'Ob': 2, 'ResCost': 4},
+		'Elapsed Time (Minutes)': {'Actions:': 8, 'Ob': 3, 'ResCost': 5},
+		'Elapsed Time (Hours)': {'Actions:': 12, 'Ob': 4, 'ResCost': 7},
+		'Elapsed Time (Days)': {'Actions:': 24, 'Ob': 5, 'ResCost': 8},
+		'Elapsed Time (Months)': {'Actions:': 43, 'Ob': 7, 'ResCost': 9},
+		'Elapsed Time (Years)': {'Actions:': 81, 'Ob': 9, 'ResCost': 10},
+		'Permanent': {'Actions:': 500, 'Ob': 10, 'ResCost': 100},
 	},
 
 	'Area of Effect': {
-		'Caster': {'Actions': 1, 'Ob': 0, 'ResCost': 0},
-		'Single Target': {'Actions': 2, 'Ob': 1, 'ResCost': 2},
-		'Presence': {'Actions': 3, 'Ob': 2, 'ResCost': 3},
-		'Half Presence': {'Actions': 3, 'Ob': 1, 'ResCost': 2},
-		'Double Presence': {'Actions': 6, 'Ob': 4, 'ResCost': 4},
-		'Natural Effect': {'Actions': 4, 'Ob': 3, 'ResCost': 4},
-		'Half Natural Effect': {'Actions': 3, 'Ob': 2, 'ResCost': 3},
-		'Double Natural Effect': {'Actions': 8, 'Ob': 6, 'ResCost': 8},
-		'Area (Paces)': {'Actions': 4, 'Ob': 2, 'ResCost': 3},
-		'Area (Tens of Paces)': {'Actions': 6, 'Ob': 4, 'ResCost': 5},
-		'Area (Hundreds of Paces)': {'Actions': 8, 'Ob': 6, 'ResCost': 6},
-		'Area (Miles)': {'Actions': 10, 'Ob': 8, 'ResCost': 8},
-		'Area (Tens of Miles)': {'Actions': 15, 'Ob': 9, 'ResCost': 9},
-		'Area (Hundreds of Miles)': {'Actions': 20, 'Ob': 10, 'ResCost': 10},
+		'Caster': {'Actions:': 1, 'Ob': 0, 'ResCost': 0},
+		'Single Target': {'Actions:': 2, 'Ob': 1, 'ResCost': 2},
+		'Presence': {'Actions:': 3, 'Ob': 2, 'ResCost': 3},
+		'Half Presence': {'Actions:': 3, 'Ob': 1, 'ResCost': 2},
+		'Double Presence': {'Actions:': 6, 'Ob': 4, 'ResCost': 4},
+		'Natural Effect': {'Actions:': 4, 'Ob': 3, 'ResCost': 4},
+		'Half Natural Effect': {'Actions:': 3, 'Ob': 2, 'ResCost': 3},
+		'Double Natural Effect': {'Actions:': 8, 'Ob': 6, 'ResCost': 8},
+		'Area (Paces)': {'Actions:': 4, 'Ob': 2, 'ResCost': 3},
+		'Area (Tens of Paces)': {'Actions:': 6, 'Ob': 4, 'ResCost': 5},
+		'Area (Hundreds of Paces)': {'Actions:': 8, 'Ob': 6, 'ResCost': 6},
+		'Area (Miles)': {'Actions:': 10, 'Ob': 8, 'ResCost': 8},
+		'Area (Tens of Miles)': {'Actions:': 15, 'Ob': 9, 'ResCost': 9},
+		'Area (Hundreds of Miles)': {'Actions:': 20, 'Ob': 10, 'ResCost': 10},
 	},
 }
 
@@ -97,28 +97,28 @@ class Facet():
 	def updateStats(self, *args):
 		if self.option.get() == 'Anima':
 			try:
-				self.obLabel.destroy()
+				self.obValueLabel.destroy()
 			except AttributeError:
 				pass
 			self.ob.set(5)
-			self.obCombobox = ttk.Combobox(self.obFrame, textvariable=self.ob, width=2)
+			self.obCombobox = ttk.Combobox(self.frame, textvariable=self.ob, width=2)
 			self.obCombobox['values'] = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 			self.obCombobox.state(['readonly'])
 			self.obCombobox.bind('<<ComboboxSelected>>', self.frame.updateAll)
-			self.obCombobox.grid(column=1, row=1, sticky=(W, E))
+			self.obCombobox.grid(column=6, row=self.row, sticky=W)
 		else:
 			try:
 				self.obCombobox.destroy()
 			except AttributeError:
 				pass
 			self.ob.set(facets[self.type.get()][self.option.get()]['Ob'])
-			self.obLabel = ttk.Label(self.obFrame, textvariable=self.ob)
-			self.obLabel.grid(column=1, row=1, sticky=(W, E))
-		self.actions.set(facets[self.type.get()][self.option.get()]['Actions'])
+			self.obValueLabel = ttk.Label(self.frame, textvariable=self.ob)
+			self.obValueLabel.grid(column=6, row=self.row, sticky=W)
+		self.actions.set(facets[self.type.get()][self.option.get()]['Actions:'])
 		self.frame.updateAll()
 		
 	def createWidgets(self):
-		self.typeSelect = ttk.Combobox(self.frame, textvariable=self.type)
+		self.typeSelect = ttk.Combobox(self.frame, textvariable=self.type, width=15)
 		self.typeSelect['values'] = sorted(facets.keys())
 		self.typeSelect.state(['readonly'])
 		self.typeSelect.bind('<<ComboboxSelected>>', self.updateOptions)
@@ -129,15 +129,17 @@ class Facet():
 		self.optionSelect.bind('<<ComboboxSelected>>', self.updateStats)
 		self.optionSelect.grid(column=3, row=self.row, columnspan=2, sticky=(W, E))
 		
-		self.obFrame = ttk.Labelframe(self.frame, text='Ob')
-		self.obFrame.grid(column=5, row=self.row, sticky=(W, E))
-		self.obLabel = ttk.Label(self.obFrame, textvariable=self.ob)
-		self.obLabel.grid(column=1, row=1, sticky=(W, E))
+		self.obLabel = ttk.Label(self.frame, text='Ob:', width=3)
+		self.obLabel.grid(column=5, row=self.row, sticky=W)
 		
-		self.actionsFrame = ttk.Labelframe(self.frame, text='Actions')
-		self.actionsFrame.grid(column=6, row=self.row, sticky=(W, E))
-		self.actionsLabel = ttk.Label(self.actionsFrame, textvariable=self.actions)
-		self.actionsLabel.grid(column=1, row=self.row, sticky=(W, E))
+		self.obValueLabel = ttk.Label(self.frame, textvariable=self.ob, width=6)
+		self.obValueLabel.grid(column=6, row=self.row, sticky=W)
+		
+		self.actionsLabel = ttk.Label(self.frame, text='Actions:')
+		self.actionsLabel.grid(column=7, row=self.row, sticky=W)
+		
+		self.actionsValueLabel = ttk.Label(self.frame, textvariable=self.actions, width=3)
+		self.actionsValueLabel.grid(column=8, row=self.row, sticky=W)
 
 	def getActions(self):
 		return float(self.actions.get())
@@ -163,8 +165,13 @@ class Distiller():
 		self.obTmp = 0
 		self.actionsTmp = 0
 		for x in self.tobedistilled:
-			self.obTmp += x.getOb()
-			self.actionsTmp += x.getActions()
+			try:
+				self.obTmp += x.getOb()
+				self.actionsTmp += x.getActions()
+			except AttributeError:
+				for y in x:
+					self.obTmp += y.getOb()
+					self.actionsTmp += y.getActions()
 		if self.round is 'true':
 			self.ob.set(str(roundMinOne(self.obTmp/2)))
 			self.actions.set(str(roundMinOne(self.actionsTmp/2)))
@@ -173,22 +180,24 @@ class Distiller():
 			self.actions.set(str(self.actionsTmp/2))
 	
 	def createWidgets(self):
-		ttk.Separator(self.frame, orient=HORIZONTAL).grid(column=1, row=self.row, columnspan=6, sticky=(W, E))
+		ttk.Separator(self.frame, orient=HORIZONTAL).grid(column=1, row=self.row, columnspan=8, sticky=(W, E))
 		
 		self.titleLabel = ttk.Label(self.frame, text=self.title, justify='right')
 		self.titleLabel.grid(column=4, row=self.row + 1, sticky=(W, E))
 		
-		self.obFrame = ttk.Labelframe(self.frame, text='Ob')
-		self.obFrame.grid(column=5, row=self.row + 1, sticky=(W, E))
-		self.obLabel = ttk.Label(self.obFrame, textvariable=self.ob)
-		self.obLabel.grid(column=1, row=self.row + 1, sticky=(W, E))
+		self.obLabel = ttk.Label(self.frame, text='Ob:')
+		self.obLabel.grid(column=5, row=self.row + 1, sticky=(W, E))
 		
-		self.actionsFrame = ttk.Labelframe(self.frame, text='Actions')
-		self.actionsFrame.grid(column=6, row=self.row + 1, sticky=(W, E))
-		self.actionsLabel = ttk.Label(self.actionsFrame, textvariable=self.actions)
-		self.actionsLabel.grid(column=1, row=self.row + 1, sticky=(W, E))
+		self.obValueLabel = ttk.Label(self.frame, textvariable=self.ob)
+		self.obValueLabel.grid(column=6, row=self.row + 1, sticky=(W, E))
 		
-		ttk.Separator(self.frame, orient=HORIZONTAL).grid(column=1, row=self.row + 2, columnspan=6, sticky=(W, E))
+		self.actionsLabel = ttk.Label(self.frame, text='Actions:')
+		self.actionsLabel.grid(column=7, row=self.row + 1, sticky=(W, E))
+		
+		self.actionsValueLabel = ttk.Label(self.frame, textvariable=self.actions)
+		self.actionsValueLabel.grid(column=8, row=self.row + 1, sticky=(W, E))
+		
+		ttk.Separator(self.frame, orient=HORIZONTAL).grid(column=1, row=self.row + 2, columnspan=8, sticky=(W, E))
 
 	def getActions(self):
 		return float(self.actions.get())
@@ -214,12 +223,20 @@ class MajorisSigil():
 		self.frame.addSigil()
 	
 	def toggleSigil(self, *args):
-		self.ob.set('1')
-		self.obCombobox['values'] = ('1', '2')
-		self.obCombobox.state(['!disabled'])
-		self.actionsEntry.state(['!disabled'])
-		self.actionsEntry.delete(0,'end')
-		self.actionsEntry.insert(0, '10')
+		if self.enabled.get():
+			self.ob.set('1')
+			self.obCombobox.state(['!disabled'])
+			self.obCombobox['values'] = ('1', '2')
+			self.actionsEntry.state(['!disabled'])
+			self.actionsEntry.delete(0,'end')
+			self.actionsEntry.insert(0, '10')
+		else:
+			self.ob.set('')
+			self.obCombobox['values'] = ('')
+			self.obCombobox.state(['disabled'])
+			self.actionsEntry.delete(0,'end')
+			self.actionsEntry.state(['disabled'])
+		self.frame.updateAll()
 	
 	def validateMultiplier(self, *args):
 		try:
@@ -235,42 +252,43 @@ class MajorisSigil():
 		except TypeError:
 			self.actionsEntry.delete(0,'end')
 			self.actionsEntry.insert(0, '10')
+		self.frame.updateAll()
 		return 1
 	
 	def correctMultiplier(self, *args):
-		pass
+		self.frame.updateAll()
 	
-	def createWidgets(self):		
-		self.toggle = Checkbutton(self.frame, text='Majoris Sigil', command=self.toggleSigil,
-			variable=self.enabled, onvalue='1', offvalue='0')
-		self.toggle.grid(column=1, row=self.row, sticky=W)
+	def createWidgets(self):
+		self.addButton = ttk.Button(self.frame, text='+', command=self.addSigil, width=3)
+		self.addButton.grid(column=1, row=self.row)
+		
+		self.toggle = Checkbutton(self.frame, text='Majoris', command=self.toggleSigil,
+			variable=self.enabled, onvalue=True, offvalue=False)
+		self.toggle.grid(column=2, row=self.row, sticky=W)
 		
 		self.obCombobox = ttk.Combobox(self.frame, textvariable=self.ob, width=2)
 		self.obCombobox.state(['readonly'])
 		self.obCombobox['values'] = ('')
 		self.obCombobox.bind('<<ComboboxSelected>>', self.frame.updateAll)
-		self.obCombobox.grid(column=2, row=self.row, sticky=W)
+		self.obCombobox.grid(column=3, row=self.row, sticky=W)
 		self.obCombobox.state(['disabled'])
 		
 		self.actionsLabel = ttk.Label(self.frame, text='Multiplier')
-		self.actionsLabel.grid(column=3, row=self.row, sticky=W)
+		self.actionsLabel.grid(column=4, row=self.row, sticky=W)
 		
 		self.actionsEntry = ttk.Entry(self.frame, validate='focusout',
-			validatecommand=self.validateMultiplier, width=4)
-		self.actionsEntry.grid(column=4, row=self.row, sticky=(W, E))
+			validatecommand=self.validateMultiplier, width=5)
+		self.actionsEntry.grid(column=5, row=self.row, sticky=W)
 		self.actionsEntry.state(['disabled'])
-		
-		self.addButton = ttk.Button(self.frame, text='+', command=self.addSigil, width=6)
-		self.addButton.grid(column=5, row=self.row, sticky=(W, E))
 
 	def getMultiplier(self):
-		if self.enabled == '1':
+		if self.enabled.get():
 			return float(self.actionsEntry.get())
 		else:
 			return 1.0
 
 	def getOb(self):
-		if self.enabled == '1':
+		if self.enabled.get():
 			return int(self.ob.get())
 		else:
 			return 0
@@ -280,28 +298,119 @@ class MajorisSigil():
 		self.frame = frame
 		self.row = row
 		self.multiplier = StringVar()
-		self.enabled = StringVar()
-		self.enabled.set('0')
+		self.enabled = BooleanVar()
+		self.enabled.set(False)
 		self.ob = StringVar()
 		self.createWidgets()
-#		self.updateStats()
 
 class App(ttk.Frame):
+	def addExtraFacet(self, *args):
+		if len(self.extraFacets) == 9:
+			self.extraFacetButton.destroy()
+		self.extraFacets.append(Facet(self, 11+len(self.extraFacets)))
+		self.configureGrid()
+	
 	def addSigil(self, *args):
-		self.i = self.i + 1
-		if self.i < 35:
-			self.sigils.append(MajorisSigil(self, self.i))
-		for child in self.winfo_children(): child.grid_configure(padx=5, pady=2)
+		self.extraFacetRow = self.extraFacetRow + 1
+		if self.extraFacetRow < 36:
+			self.majorisSigils.append(MajorisSigil(self, self.extraFacetRow))
+		self.configureGrid()
+	
+	def generateRange(self, limit, *args):
+		self.rangeList = []
+		for i in range(limit):
+			self.rangeList.append(str(i))
+		return self.rangeList
+	
+	def configureGrid(self, *args):
+		for child in self.winfo_children(): child.grid_configure(padx=2, pady=2)
 	
 	def updateAll(self, *args):
-		#Distillations
+		# Distillations
 		self.distiller1.updateStats()
 		self.distiller2.updateStats()
 		self.distiller3.updateStats()
-		#Final Spell
-		# ToDO
-		#self.capValue
-		#self.minorisCombobox['values'] # set current limit
+		
+		# After Final Distillation
+		self.finalObValue = roundMinOne(self.distiller3.getOb())
+		self.finalActionsValue = roundMinOne(self.distiller3.getActions())
+		
+		# Cap Sigil
+		if self.capValue.get():
+			self.finalObValue -= 1
+		
+		# Minoris Sigil(s)
+		try:
+			self.finalObValue -= int(self.minorisValue.get())
+			# Limit minoris sigil amount
+			limit = int(self.minorisValue.get()) + self.finalObValue
+			if limit < 1:
+				self.minorisCombobox['values'] = (0)
+			else:
+				self.minorisCombobox['values'] = tuple(range(int(limit)))
+			del limit
+		except ValueError:
+			pass
+		
+		# Majoris Sigil(s)
+		for s in self.majorisSigils:
+			self.finalObValue += s.getOb()
+			self.finalActionsValue *= s.getMultiplier()
+		
+		# Extention(s)
+		try:
+			self.finalObValue -= 1*int(self.extendValue.get())
+			self.finalActionsValue *= 5**int(self.extendValue.get())
+			# Limit number of extentions
+			origOb = roundMinOne(self.distiller3.getOb())
+			minOb = roundUp(origOb / 2)
+			if self.finalObValue > minOb:
+				limit = self.finalObValue - minOb + 1 + int(self.extendValue.get())
+			else:
+				limit = int(self.extendValue.get()) + 1 # current number
+			self.extendCombobox['values'] = tuple(range(int(limit)))
+			del limit
+			del minOb
+			del origOb
+		except ValueError:
+			pass
+		
+		# Compression(s)
+		cTest = self.finalActionsValue
+		curCompress = int(self.compressValue.get())
+		try:
+			if curCompress > 0:
+				self.finalObValue += 1*curCompress
+				self.finalActionsValue = roundMinOne(ceil(self.finalActionsValue*(1/2)**curCompress))
+			# Limit number of compressions
+			if self.finalActionsValue == 1:
+				if roundMinOne(self.distiller3.getActions()) == 1:
+					limit = 1
+				else:
+					for x in range(curCompress+1):
+						cTest = ceil(cTest/2)
+						#print('cTest (', x, ') ', cTest)
+						if cTest == 1:
+							#print('\tSet limit: ', x + 2)
+							limit = x + 2
+							break
+						else:
+							# VERY WRONG, SHOULDN'T HAPPEN
+							limit = 1
+			else:
+				limit = ceil(log(1/self.finalActionsValue, 1/2)) + 1 + curCompress
+			self.compressCombobox['values'] = tuple(range(int(limit)))
+			del limit
+		except ValueError:
+			pass
+		
+		# Final Spell Stats
+		if self.capValue.get():
+			self.finalOb.set(roundMinOne(self.finalObValue))
+		else:
+			self.finalOb.set(str(roundMinOne(self.finalObValue)) + '^')
+		self.finalActions.set(int(self.finalActionsValue))
+		self.configureGrid()
 		
 	def createWidgets(self):
 		# 1st Distillation
@@ -322,69 +431,98 @@ class App(ttk.Frame):
 		
 		# 3rd Distillation
 		self.facet5 = Facet(self, 10, 'Area of Effect')
-		self.facet6 = Facet(self, 11)
-		self.facet7 = Facet(self, 12)
+		
+		self.extraFacetButton = ttk.Button(self, text='+', command=self.addExtraFacet, width=3)
+		self.extraFacetButton.grid(column=1, row=19)
 		
 		self.distiller3 = Distiller(self, 20, 'Final Distillation',
-			(self.distiller1, self.distiller2, self.facet5, self.facet6, self.facet7),
+			(self.distiller1, self.distiller2, self.facet5, self.extraFacets),
 			round='true'
 		)
 		
+		# Sigils
+		ttk.Label(self, text='Sigils').grid(column=1, row=24)
+		
 		# Adjustments - Cap & Minoris Sigil(S)		
 		self.capCheckbutton = Checkbutton(self, text='Cap', command=self.updateAll,
-			variable=self.capValue, onvalue='1', offvalue='0')
-		self.capCheckbutton.grid(column=1, row=24, sticky=W)
+			variable=self.capValue, onvalue=True, offvalue=False)
+		self.capCheckbutton.grid(column=2, row=25, sticky=W)
 		
-		self.minorisLabel = ttk.Label(self, text='Minoris Sigils')
-		self.minorisLabel.grid(column=3, row=24, sticky=E)
+		self.minorisLabel = ttk.Label(self, text='Minoris')
+		self.minorisLabel.grid(column=4, row=25, sticky=E)
 		
 		self.minorisCombobox = ttk.Combobox(self, textvariable=self.minorisValue, width=2)
 		self.minorisCombobox.state(['readonly'])
-		self.minorisCombobox['values'] = ('0')
-#		self.minorisCombobox.bind('<<ComboboxSelected>>', self.updateStats)
-		self.minorisCombobox.grid(column=4, row=24, sticky=W)
+		self.minorisCombobox['values'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		self.minorisCombobox.bind('<<ComboboxSelected>>', self.updateAll)
+		self.minorisCombobox.grid(column=5, row=25, sticky=W)
 		
 		# Adjustments - Majoris Sigil(S)
-		self.sigils.append(MajorisSigil(self, self.i))
+		self.majorisSigils.append(MajorisSigil(self, self.extraFacetRow))
 		
 		# Adjustments - Compress & Extend		
 		self.compressLabel = ttk.Label(self, text='Compressions')
-		self.compressLabel.grid(column=1, row=35, sticky=W)
+		self.compressLabel.grid(column=2, row=36, sticky=W)
 		
 		self.compressCombobox = ttk.Combobox(self, textvariable=self.compressValue, width=2)
 		self.compressCombobox.state(['readonly'])
-		self.compressCombobox['values'] = ('0')
-#		self.compressCombobox.bind('<<ComboboxSelected>>', self.updateStats)
-		self.compressCombobox.grid(column=2, row=35, sticky=W)
+		self.compressCombobox['values'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		self.compressCombobox.bind('<<ComboboxSelected>>', self.updateAll)
+		self.compressCombobox.grid(column=3, row=36, sticky=W)
 		
 		self.extendLabel = ttk.Label(self, text='Extentions')
-		self.extendLabel.grid(column=3, row=35, sticky=W)
+		self.extendLabel.grid(column=4, row=36, sticky=W)
 		
 		self.extendCombobox = ttk.Combobox(self, textvariable=self.extendValue, width=2)
 		self.extendCombobox.state(['readonly'])
-		self.extendCombobox['values'] = ('0')
-#		self.extendCombobox.bind('<<ComboboxSelected>>', self.updateStats)
-		self.extendCombobox.grid(column=4, row=35, sticky=W)
+		self.extendCombobox['values'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		self.extendCombobox.bind('<<ComboboxSelected>>', self.updateAll)
+		self.extendCombobox.grid(column=5, row=36, sticky=W)
 		
 		# Final Spell Results
-		# ToDO
+		ttk.Separator(self, orient=HORIZONTAL).grid(column=1, row=37, columnspan=8, sticky=(W, E))
+		
+		self.titleLabel = ttk.Label(self, text='Final Spell Stats', justify='right')
+		self.titleLabel.grid(column=4, row=38, sticky=(W, E))
+		
+		self.obLabel = ttk.Label(self, text='Ob:')
+		self.obLabel.grid(column=5, row=38, sticky=(W, E))
+		
+		self.obValueLabel = ttk.Label(self, textvariable=self.finalOb)
+		self.obValueLabel.grid(column=6, row=38, sticky=(W, E))
+		
+		self.actionsLabel = ttk.Label(self, text='Actions:')
+		self.actionsLabel.grid(column=7, row=38, sticky=(W, E))
+		
+		self.actionsValueLabel = ttk.Label(self, textvariable=self.finalActions)
+		self.actionsValueLabel.grid(column=8, row=38, sticky=(W, E))
 		
 	def __init__(self, master):
 		Frame.__init__(self, master)
 		self.frame = master
-		self.capValue = StringVar()
-		self.capValue.set('0')
+		self.capValue = BooleanVar()
+		self.capValue.set(False)
 		self.compressValue = StringVar()
+		self.compressValue.set(0)
 		self.extendValue = StringVar()
+		self.extendValue.set(0)
 		self.minorisValue = StringVar()
-		self.i = 25
-		self.sigils = []
+		self.minorisValue.set(0)
+		self.extraFacetRow = 26
+		self.extraFacets = []
+		self.finalOb = StringVar()
+		self.finalObValue = 1
+		self.finalActions = StringVar()
+		self.finalActionsValue = 1
+		self.majorisSigils = []
 		self.createWidgets()
 		self.updateAll()
-		for child in self.winfo_children(): child.grid_configure(padx=5, pady=2)
+		self.configureGrid()
 
 root = Tk()
 root.title('Spell Burner')
+#root.resizable(0, 0)						# disable window resizing
+root.resizable(width=FALSE, height=FALSE)	# disable window resizing
 
 app = App(root)
 app.grid(column=0, row=0, sticky=(N, W, E, S))
