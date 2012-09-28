@@ -1,74 +1,200 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.09a
+# Version 0.10a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
 
-facets = {
+facetsMaBu = {
 	'Element': {
-		'Air': {'Actions:': 4, 'Ob': 2, 'ResCost': 10},
-		'Anima': {'Actions:': 5, 'Ob': 5, 'ResCost': 12},
-		'Arcana': {'Actions:': 10, 'Ob': 4, 'ResCost': 13},
-		'Earth': {'Actions:': 6, 'Ob': 1, 'ResCost': 8},
-		'Fire': {'Actions:': 5, 'Ob': 2, 'ResCost': 10},
-		'Heaven': {'Actions:': 8, 'Ob': 3, 'ResCost': 10},
-		'Water': {'Actions:': 3, 'Ob': 2, 'ResCost': 9},
-		'White': {'Actions:': 7, 'Ob': 4, 'ResCost': 11},
+		'Air': {'Actions': 4, 'Ob': 2, 'ResCost': 10,
+			'Weapon': {'Power': 0, 'VA': 8, 'RangeModifier': 1},
+		},
+		'Anima': {'Actions': 5, 'Ob': 5, 'ResCost': 12,
+			'Weapon': {'Power': 4, 'VA': 1, 'RangeModifier': -1},
+		},
+		'Arcana': {'Actions': 10, 'Ob': 4, 'ResCost': 13,
+			'Weapon': {'Power': -1, 'VA': 1, 'RangeModifier': 3},
+		},
+		'Earth': {'Actions': 6, 'Ob': 1, 'ResCost': 8,
+			'Weapon': {'Power': 3, 'VA': 3, 'RangeModifier': 0},
+		},
+		'Fire': {'Actions': 5, 'Ob': 2, 'ResCost': 10,
+			'Weapon': {'Power': 2, 'VA': 2, 'RangeModifier': 0},
+		},
+		'Heaven': {'Actions': 8, 'Ob': 3, 'ResCost': 10,
+			'Weapon': {'Power': 0, 'VA': 2, 'RangeModifier': 2},
+		},
+		'Water': {'Actions': 3, 'Ob': 2, 'ResCost': 9,
+			'Weapon': {'Power': 1, 'VA': 3, 'RangeModifier': 0},
+		},
+		'White': {'Actions': 7, 'Ob': 4, 'ResCost': 11,
+			'Weapon': {'Power': 5, 'VA': 4, 'RangeModifier': 0},
+		},
 	},
 
 	'Impetus': {
-		'Control': {'Actions:': 16, 'Ob': 5, 'ResCost': 5},
-		'Create': {'Actions:': 32, 'Ob': 6, 'ResCost': 6},
-		'Destroy': {'Actions:': 2, 'Ob': 2, 'ResCost': 3},
-		'Enhance': {'Actions:': 12, 'Ob': 4, 'ResCost': 4},
-		'Influence': {'Actions:': 4, 'Ob': 3, 'ResCost': 3},
-		'Tax': {'Actions:': 1, 'Ob': 1, 'ResCost': 2},
-		'Transmute (Control)': {'Actions:': 25, 'Ob': 8, 'ResCost': 7},
-		'Transmute (Create)': {'Actions:': 25, 'Ob': 9, 'ResCost': 7},
-		'Transmute (Destroy)': {'Actions:': 25, 'Ob': 5, 'ResCost': 7},
-		'Transmute (Enhance)': {'Actions:': 25, 'Ob': 7, 'ResCost': 7},
-		'Transmute (Influence)': {'Actions:': 25, 'Ob': 6, 'ResCost': 7},
-		'Transmute (Tax)': {'Actions:': 25, 'Ob': 4, 'ResCost': 7},
+		'Control': {'Actions': 16, 'Ob': 5, 'ResCost': 5},
+		'Create': {'Actions': 32, 'Ob': 6, 'ResCost': 6},
+		'Destroy': {'Actions': 2, 'Ob': 2, 'ResCost': 3},
+		'Enhance': {'Actions': 12, 'Ob': 4, 'ResCost': 4},
+		'Influence': {'Actions': 4, 'Ob': 3, 'ResCost': 3},
+		'Tax': {'Actions': 1, 'Ob': 1, 'ResCost': 2},
+		'Transmute (Control)': {'Actions': 25, 'Ob': 8, 'ResCost': 7},
+		'Transmute (Create)': {'Actions': 25, 'Ob': 9, 'ResCost': 7},
+		'Transmute (Destroy)': {'Actions': 25, 'Ob': 5, 'ResCost': 7},
+		'Transmute (Enhance)': {'Actions': 25, 'Ob': 7, 'ResCost': 7},
+		'Transmute (Influence)': {'Actions': 25, 'Ob': 6, 'ResCost': 7},
+		'Transmute (Tax)': {'Actions': 25, 'Ob': 4, 'ResCost': 7},
 	},
 
 	'Origin': {
-		'Personal': {'Actions:': 1, 'Ob': 0, 'ResCost': 0},
-		'Presence': {'Actions:': 2, 'Ob': 2, 'ResCost': 2},
-		'Sight': {'Actions:': 4, 'Ob': 4, 'ResCost': 4},
+		'Personal': {'Actions': 1, 'Ob': 0, 'ResCost': 0},
+		'Presence': {'Actions': 2, 'Ob': 2, 'ResCost': 2},
+		'Sight': {'Actions': 4, 'Ob': 4, 'ResCost': 4},
 	},
 
 	'Duration': {
-		'Instantaneous': {'Actions:': 1, 'Ob': 0, 'ResCost': 0},
-		'Sustained': {'Actions:': 2, 'Ob': 2, 'ResCost': 2},
-		'Elapsed Time (Seconds)': {'Actions:': 2, 'Ob': 1, 'ResCost': 2},
-		'Elapsed Time (Exchanges)': {'Actions:': 6, 'Ob': 2, 'ResCost': 4},
-		'Elapsed Time (Minutes)': {'Actions:': 8, 'Ob': 3, 'ResCost': 5},
-		'Elapsed Time (Hours)': {'Actions:': 12, 'Ob': 4, 'ResCost': 7},
-		'Elapsed Time (Days)': {'Actions:': 24, 'Ob': 5, 'ResCost': 8},
-		'Elapsed Time (Months)': {'Actions:': 43, 'Ob': 7, 'ResCost': 9},
-		'Elapsed Time (Years)': {'Actions:': 81, 'Ob': 9, 'ResCost': 10},
-		'Permanent': {'Actions:': 500, 'Ob': 10, 'ResCost': 100},
+		'Instantaneous': {'Actions': 1, 'Ob': 0, 'ResCost': 0},
+		'Sustained': {'Actions': 2, 'Ob': 2, 'ResCost': 2},
+		'Elapsed Time (Seconds)': {'Actions': 2, 'Ob': 1, 'ResCost': 2},
+		'Elapsed Time (Exchanges)': {'Actions': 6, 'Ob': 2, 'ResCost': 4},
+		'Elapsed Time (Minutes)': {'Actions': 8, 'Ob': 3, 'ResCost': 5},
+		'Elapsed Time (Hours)': {'Actions': 12, 'Ob': 4, 'ResCost': 7},
+		'Elapsed Time (Days)': {'Actions': 24, 'Ob': 5, 'ResCost': 8},
+		'Elapsed Time (Months)': {'Actions': 43, 'Ob': 7, 'ResCost': 9},
+		'Elapsed Time (Years)': {'Actions': 81, 'Ob': 9, 'ResCost': 10},
+		'Permanent': {'Actions': 500, 'Ob': 10, 'ResCost': 100},
 	},
 
 	'Area of Effect': {
-		'Caster': {'Actions:': 1, 'Ob': 0, 'ResCost': 0},
-		'Single Target': {'Actions:': 2, 'Ob': 1, 'ResCost': 2},
-		'Presence': {'Actions:': 3, 'Ob': 2, 'ResCost': 3},
-		'Half Presence': {'Actions:': 3, 'Ob': 1, 'ResCost': 2},
-		'Double Presence': {'Actions:': 6, 'Ob': 4, 'ResCost': 4},
-		'Natural Effect': {'Actions:': 4, 'Ob': 3, 'ResCost': 4},
-		'Half Natural Effect': {'Actions:': 3, 'Ob': 2, 'ResCost': 3},
-		'Double Natural Effect': {'Actions:': 8, 'Ob': 6, 'ResCost': 8},
-		'Area (Paces)': {'Actions:': 4, 'Ob': 2, 'ResCost': 3},
-		'Area (Tens of Paces)': {'Actions:': 6, 'Ob': 4, 'ResCost': 5},
-		'Area (Hundreds of Paces)': {'Actions:': 8, 'Ob': 6, 'ResCost': 6},
-		'Area (Miles)': {'Actions:': 10, 'Ob': 8, 'ResCost': 8},
-		'Area (Tens of Miles)': {'Actions:': 15, 'Ob': 9, 'ResCost': 9},
-		'Area (Hundreds of Miles)': {'Actions:': 20, 'Ob': 10, 'ResCost': 10},
+		'Caster': {'Actions': 1, 'Ob': 0, 'ResCost': 0,
+			'Personal': {'Length': 0, 'Range': 0},
+			'Presence': {'Length': 0, 'Range': 0},
+			'Sight': {'Length': 0, 'Range': 0},
+		},
+		'Single Target': {'Actions': 2, 'Ob': 1, 'ResCost': 2,
+			'Personal': {'Length': 0, 'Range': 0},
+			'Presence': {'Length': 3, 'Range': 1},
+			'Sight': {'Length': 4, 'Range': 4},
+		},
+		'Presence': {'Actions': 3, 'Ob': 2, 'ResCost': 3,
+			'Personal': {'Length': 3, 'Range': 1},
+			'Presence': {'Length': 4, 'Range': 1},
+			'Sight': {'Length': 4, 'Range': 6},
+		},
+		'Half Presence': {'Actions': 3, 'Ob': 1, 'ResCost': 2,
+			'Personal': {'Length': 1, 'Range': 1},
+			'Presence': {'Length': 1, 'Range': 1},
+			'Sight': {'Length': 1, 'Range': 3},
+		},
+		'Double Presence': {'Actions': 6, 'Ob': 4, 'ResCost': 4,
+			'Personal': {'Length': 4, 'Range': 2},
+			'Presence': {'Length': 4, 'Range': 2},
+			'Sight': {'Length': 4, 'Range': 12},
+		},
+		'Natural Effect': {'Actions': 4, 'Ob': 3, 'ResCost': 4,
+			'Personal': {'Length': 3, 'Range': 4},
+			'Presence': {'Length': 3, 'Range': 4},
+			'Sight': {'Length': 4, 'Range': 8},
+		},
+		'Half Natural Effect': {'Actions': 3, 'Ob': 2, 'ResCost': 3,
+			'Personal': {'Length': 1, 'Range': 2},
+			'Presence': {'Length': 1, 'Range': 2},
+			'Sight': {'Length': 2, 'Range': 4},
+		},
+		'Double Natural Effect': {'Actions': 8, 'Ob': 6, 'ResCost': 8,
+			'Personal': {'Length': 4, 'Range': 8},
+			'Presence': {'Length': 4, 'Range': 8},
+			'Sight': {'Length': 4, 'Range': 16},
+		},
+		'Area (Paces)': {'Actions': 4, 'Ob': 2, 'ResCost': 3,
+			'Personal': {'Length': 2, 'Range': 0},
+			'Presence': {'Length': 3, 'Range': 1},
+			'Sight': {'Length': 4, 'Range': 5},
+		},
+		'Area (Tens of Paces)': {'Actions': 6, 'Ob': 4, 'ResCost': 5,
+			'Personal': {'Length': 4, 'Range': 1},
+			'Presence': {'Length': 4, 'Range': 2},
+			'Sight': {'Length': 4, 'Range': 7},
+		},
+		'Area (Hundreds of Paces)': {'Actions': 8, 'Ob': 6, 'ResCost': 6,
+			'Personal': {'Length': 4, 'Range': 2},
+			'Presence': {'Length': 4, 'Range': 3},
+			'Sight': {'Length': 4, 'Range': 9},
+		},
+		'Area (Miles)': {'Actions': 10, 'Ob': 8, 'ResCost': 8,
+			'Personal': {'Length': 4, 'Range': 4},
+			'Presence': {'Length': 4, 'Range': 5},
+			'Sight': {'Length': 4, 'Range': 14},
+		},
+		'Area (Tens of Miles)': {'Actions': 15, 'Ob': 9, 'ResCost': 9,
+			'Personal': {'Length': 4, 'Range': 8},
+			'Presence': {'Length': 4, 'Range': 9},
+			'Sight': {'Length': 4, 'Range': 16},
+		},
+		'Area (Hundreds of Miles)': {'Actions': 20, 'Ob': 10, 'ResCost': 10,
+			'Personal': {'Length': 4, 'Range': 12},
+			'Presence': {'Length': 4, 'Range': 13},
+			'Sight': {'Length': 4, 'Range': 20},
+		},
 	},
 }
+
+weaponLength = ['Shortest', 'Short', 'Long', 'Longer', 'Longest']
+
+def getFacetTypes():
+	return sorted(facetsMaBu.keys())
+
+def getFacetOptions(facet):
+	return sorted(facetsMaBu[facet].keys())
+
+def getFacetActions(facet, option):
+	return facetsMaBu[facet][option]['Actions']
+
+def getFacetOb(facet, option):
+	return facetsMaBu[facet][option]['Ob']
+
+def getElementWeaponStats(elements, origins, aoes):
+	weaponStats = {}
+	for e in elements:
+		try:
+			for k in facetsMaBu['Element'][e]['Weapon']:
+				try:
+					weaponStats[k] += facetsMaBu['Element'][e]['Weapon'][k]
+				except KeyError:
+					weaponStats[k] = facetsMaBu['Element'][e]['Weapon'][k]
+		except KeyError:
+			pass
+	for a in aoes:
+		for o in origins:
+			try:
+				for k in facetsMaBu['Area of Effect'][a][o]:
+					try:
+						weaponStats[k] = max(weaponStats[k], facetsMaBu['Area of Effect'][a][o][k])
+					except KeyError:
+						weaponStats[k] = facetsMaBu['Area of Effect'][a][o][k]
+			except KeyError:
+				pass
+	try:
+		weaponStats['Length'] = weaponLength[weaponStats['Length']]
+		weaponStats['Range'] += weaponStats.pop('RangeModifier')
+	except KeyError:
+		pass
+	return weaponStats
+	
+def generateRange(min, max):
+	rangeList = []
+	if min > max:
+		# Uh....
+		return [0]
+	elif min == max:
+		return [min]
+	else:
+		for i in range(min, max+1):
+			rangeList.append(str(i))
+		return rangeList
 
 def roundMath(x):
 	if (x - floor(x) >= 0.5):
@@ -76,18 +202,22 @@ def roundMath(x):
 	else:
 		return floor(x)
 
-def roundDownMinOne(x):
-	if (floor(x) == 0):
-		return 1
-	else:
-		return floor(x)
-
 class Facet():
 	def updateOptions(self, *args):
 		try:
-			self.optionSelect['values'] = sorted(facets[self.type.get()].keys())
+			self.optionSelect['values'] = getFacetOptions(self.type.get())
 		except KeyError:
 			pass
+		self.actions.set('0')
+		self.ob.set('0')
+		self.option.set('')
+		try:
+			self.obCombobox.destroy()
+			self.obValueLabel = ttk.Label(self.frame, textvariable=self.ob)
+			self.obValueLabel.grid(column=6, row=self.row, sticky=W)
+		except AttributeError:
+			pass
+		self.frame.updateAll()
 		
 	def updateStats(self, *args):
 		if self.option.get() == 'Anima':
@@ -106,15 +236,15 @@ class Facet():
 				self.obCombobox.destroy()
 			except AttributeError:
 				pass
-			self.ob.set(facets[self.type.get()][self.option.get()]['Ob'])
+			self.ob.set(getFacetOb(self.type.get(), self.option.get()))
 			self.obValueLabel = ttk.Label(self.frame, textvariable=self.ob)
 			self.obValueLabel.grid(column=6, row=self.row, sticky=W)
-		self.actions.set(facets[self.type.get()][self.option.get()]['Actions:'])
+		self.actions.set(getFacetActions(self.type.get(), self.option.get()))
 		self.frame.updateAll()
 		
 	def createWidgets(self):
-		self.typeSelect = ttk.Combobox(self.frame, textvariable=self.type, width=15)
-		self.typeSelect['values'] = sorted(facets.keys())
+		self.typeSelect = ttk.Combobox(self.frame, textvariable=self.type, width=18)
+		self.typeSelect['values'] = getFacetTypes()
 		self.typeSelect.state(['readonly'])
 		self.typeSelect.bind('<<ComboboxSelected>>', self.updateOptions)
 		self.typeSelect.grid(column=1, row=self.row, columnspan=2, sticky=(W, E))
@@ -141,6 +271,12 @@ class Facet():
 
 	def getOb(self):
 		return float(self.ob.get())
+
+	def getOption(self):
+		return str(self.option.get())
+
+	def getType(self):
+		return str(self.type.get())
 		
 	def __init__(self, frame, row, default=''):
 		self.frame = frame
@@ -153,7 +289,10 @@ class Facet():
 		self.type = StringVar()
 		self.type.set(default)
 		self.createWidgets()
-		self.updateOptions()
+		try:
+			self.optionSelect['values'] = getFacetOptions(self.type.get())
+		except KeyError:
+			pass
 
 class Distiller():
 	def updateStats(self, *args):
@@ -167,9 +306,9 @@ class Distiller():
 				for y in x:
 					self.obTmp += y.getOb()
 					self.actionsTmp += y.getActions()
-		if self.round is 'true':
-			self.ob.set(str(roundMath(self.obTmp/2)))
-			self.actions.set(str(roundMath(self.actionsTmp/2)))
+		if self.final:
+			self.ob.set(str(max(1,roundMath(self.obTmp/2))))
+			self.actions.set(str(max(1,roundMath(self.actionsTmp/2))))
 		else:
 			self.ob.set(str(self.obTmp/2))
 			self.actions.set(str(self.actionsTmp/2))
@@ -200,12 +339,12 @@ class Distiller():
 	def getOb(self):
 		return float(self.ob.get())
 	
-	def __init__(self, frame, row, title, tobedistilled, round='false', *args):
+	def __init__(self, frame, row, title, tobedistilled, final=False, *args):
 		self.frame = frame
 		self.row = row
 		self.title = title
 		self.tobedistilled = tobedistilled
-		self.round = round
+		self.final = final
 		self.actions = StringVar()
 		self.ob = StringVar()
 		self.createWidgets()
@@ -215,7 +354,7 @@ class MajorisSigil():
 	
 	def addSigil(self, *args):
 		self.addButton.destroy()
-		self.frame.addSigil()
+		self.frame.addMajorisSigil()
 	
 	def toggleSigil(self, *args):
 		if self.enabled.get():
@@ -298,35 +437,142 @@ class MajorisSigil():
 		self.ob = StringVar()
 		self.createWidgets()
 
+class WeaponStats():
+	def updateDisplay(self, *args):
+		if self.enabled:
+			if not(self.prev):
+				self.line = ttk.Separator(self.frame, orient=HORIZONTAL)
+				self.line.grid(column=1, row=self.row, columnspan=8, sticky=(W, E))
+				
+				self.lengthValueLabel = ttk.Label(self.frame, textvariable = self.wLength)
+				self.lengthValueLabel.grid(column=1, row=self.row+1, columnspan=2, sticky=(W, E))
+				
+				self.rangeLabel = ttk.Label(self.frame, text='Range:', justify='right')
+				self.rangeLabel.grid(column=3, row=self.row+1, sticky=(W, E))
+				self.rangeValueLabel = ttk.Label(self.frame, textvariable = self.wRange)
+				self.rangeValueLabel.grid(column=4, row=self.row+1, sticky=(W, E))
+				
+				self.powerLabel = ttk.Label(self.frame, text='Power:', justify='right')
+				self.powerLabel.grid(column=5, row=self.row+1, sticky=(W, E))
+				self.powerValueLabel = ttk.Label(self.frame, textvariable = self.wPower)
+				self.powerValueLabel.grid(column=6, row=self.row+1, sticky=(W, E))
+				
+				self.vaLabel = ttk.Label(self.frame, text='VA:', justify='right')
+				self.vaLabel.grid(column=7, row=self.row+1, sticky=(W, E))
+				self.vaValueLabel = ttk.Label(self.frame, textvariable = self.wVA)
+				self.vaValueLabel.grid(column=8, row=self.row+1, sticky=(W, E))
+				self.frame.configureGrid()
+		else:
+			# hide widgets
+			try:
+				self.line.destroy()
+				self.line.destroy()
+				
+				self.lengthValueLabel.destroy()
+				
+				self.rangeLabel.destroy()
+				self.rangeValueLabel.destroy()
+				
+				self.powerLabel.destroy()
+				self.powerValueLabel.destroy()
+				
+				self.vaLabel.destroy()
+				self.vaValueLabel.destroy()
+				self.frame.configureGrid()
+			except AttributeError:
+				pass
+	
+	def updateStats(self, *args):
+		# Initialize
+		self.prev = self.enabled & True # Not link?
+		self.enabled = True
+		self.spell = {}
+		self.tmp = {}
+		for f in self.frame.facets:
+			if f.getOption == '':
+				self.enabled = False
+				break
+			try:
+				self.spell[f.getType()][f.getOption()] = 0
+			except KeyError:
+				self.spell[f.getType()] = {}
+				self.spell[f.getType()][f.getOption()] = 0
+		
+		# Enable/Disable
+		if self.enabled:
+			if len(self.spell) < 5:
+				self.enabled = False
+			else:
+				if not('Destroy' in self.spell['Impetus']):
+					self.enabled = False
+		
+		# Update Stats
+		if self.enabled:
+			self.tmp = getElementWeaponStats(
+				list(self.spell['Element']),
+				list(self.spell['Origin']),
+				list(self.spell['Area of Effect'])
+			)
+			if len(self.tmp) == 4:
+				self.wLength.set('Weapon Length:  ' + str(self.tmp['Length']))
+				if self.tmp['Power'] > 0:
+					self.wPower.set('Will + ' + str(self.tmp['Power']))
+				elif self.tmp['Power'] == 0:
+					self.wPower.set('Will')
+				else: #self.tmp['Power'] < 0:
+					self.wPower.set('Will - ' + str(abs(self.tmp['Power'])))
+				self.wRange.set(str(max(0,self.tmp['Range'])) + 'D')
+				self.wVA.set(self.tmp['VA'])
+			else:
+				self.enabled = False
+		
+		# Update display
+		self.updateDisplay()
+	
+	def __init__(self, frame, row, *args):
+		self.frame = frame
+		self.row = row
+		self.enabled = False
+		self.prev = False
+		self.spell = {}
+		self.wDesc = StringVar()
+		self.wLength = StringVar()
+		self.wPower = StringVar()
+		self.wRange = StringVar()
+		self.wVA = StringVar()
+
 class App(ttk.Frame):
 	def addExtraFacet(self, *args):
-		if len(self.extraFacets) == 9:
+		if len(self.facets[5:]) == self.extraFacetMaxRows:
 			self.extraFacetButton.destroy()
-		self.extraFacets.append(Facet(self, 11+len(self.extraFacets)))
+		self.facets.append(Facet(self, self.extrafacetsMaButartRow+len(self.facets[5:])))
+		
+		# Update Distiller
+		self.distiller3 = Distiller(self, 20, 'Final Distillation',
+			(self.distiller1, self.distiller2, self.facets[4:]),
+			final=True
+		)
 		self.configureGrid()
 	
-	def addSigil(self, *args):
-		self.extraFacetRow = self.extraFacetRow + 1
-		if self.extraFacetRow < 36:
-			self.majorisSigils.append(MajorisSigil(self, self.extraFacetRow))
+	def addMajorisSigil(self, *args):
+		self.majorisStartRow = self.majorisStartRow + 1
+		if len(self.majorisSigils) < majorisMaxRows:
+			self.majorisSigils.append(MajorisSigil(self, self.majorisStartRow))
 		self.configureGrid()
-	
-	def generateRange(self, min, max, *args):
-		self.rangeList = []
-		if min > max:
-			# Uh....
-			return [0]
-		elif min == max:
-			return [min]
-		else:
-			for i in range(min, max+1):
-				self.rangeList.append(str(i))
-			return self.rangeList
 	
 	def configureGrid(self, *args):
 		for child in self.winfo_children(): child.grid_configure(padx=2, pady=2)
 	
-	def updateSpellStats(self, *args):
+	def updateAll(self, *args):
+		### Distillations ###
+		self.distiller1.updateStats()
+		self.distiller2.updateStats()
+		self.distiller3.updateStats()
+		
+		### Weapon Stats ###
+		self.weapon.updateStats()
+		
+		### Final Spell ###
 		# Init Variables
 		if self.capValue.get():
 			self.numCap = 1
@@ -349,6 +595,10 @@ class App(ttk.Frame):
 		self.subTotalOb = roundMath(self.distiller3.getOb())
 		# Before rounding
 		self.preAct = max(1, self.subTotalAct)*self.majActTotal*0.5**self.numCs
+		self.preEs = self.subTotalOb
+		self.preEs -= self.numCap
+		self.preEs -= self.numMin
+		self.preEs += self.majObTotal
 		self.preOb = self.subTotalOb
 		self.preOb -= self.numCap
 		self.preOb -= self.numMin
@@ -388,25 +638,25 @@ class App(ttk.Frame):
 			self.minCs = min(10, self.numCs + abs(self.preOb) + 1)
 			self.maxEs = max(0, self.numEs - abs(self.preOb) - 1)
 			self.maxMin = max(0, self.numMin - abs(self.preOb) - 1)
-		elif self.preOb == 1:
-			self.maxEs = min(10, self.preOb - ceil(self.subTotalOb/2) + self.numEs)
-			self.maxMin = min(10, self.preOb - 1 + self.numMin)
-			self.minCs = max(0, self.numCs)
+		#elif self.preOb == 1:
+		#	self.maxEs = min(10, floor(self.preOb/2) + self.numEs)
+		#	self.maxMin = min(10, self.preOb - 1 + self.numMin)
+		#	self.minCs = max(0, self.numCs)
 		else: # self.preOb > 1
-			self.maxEs = min(10, self.preOb - ceil(self.subTotalOb/2) + self.numEs)
+			self.maxEs = min(10, floor((self.preEs)/2))
 			self.maxMin = min(10, self.preOb - 1 + self.numMin)
 			self.minCs = max(0, min(10, self.numCs - self.preOb + 1))
 		
 		# Set limits
 		if self.numCap == 0:
 			self.capValue.set(False)
-		self.minorisCombobox['values'] = self.generateRange(self.minMin, self.maxMin)
-		self.compressCombobox['values'] = self.generateRange(self.minCs, self.maxCs)
-		self.extendCombobox['values'] = self.generateRange(self.minEs, self.maxEs)
+		self.minorisCombobox['values'] = generateRange(self.minMin, self.maxMin)
+		self.compressCombobox['values'] = generateRange(self.minCs, self.maxCs)
+		self.extendCombobox['values'] = generateRange(self.minEs, self.maxEs)
 		
 		# Misc Checks
-		if self.preOb < ceil(self.subTotalOb/2):
-			if self.numEs > self.preOb - ceil(self.subTotalOb/2) + self.numEs >= 0:
+		if self.preOb < ceil((self.preEs)/2):
+			if self.numEs > floor(self.preEs/2):
 				self.valid = False
 		
 		# Set Stats
@@ -420,42 +670,33 @@ class App(ttk.Frame):
 		else:
 			self.warningLabelText.set('[HOUSE RULED]')
 		self.configureGrid()
-	
-	def updateAll(self, *args):
-		# Distillations
-		self.distiller1.updateStats()
-		self.distiller2.updateStats()
-		self.distiller3.updateStats()
-		
-		# Final Spell
-		self.updateSpellStats()
 		
 	def createWidgets(self):
 		# 1st Distillation
-		self.facet1 = Facet(self, 0, 'Element')
-		self.facet2 = Facet(self, 1, 'Impetus')
+		self.facets.append(Facet(self, 0, 'Element'))
+		self.facets.append(Facet(self, 1, 'Impetus'))
 		
 		self.distiller1 = Distiller(self, 2, '1st Distillation',
-			(self.facet1, self.facet2)
+			self.facets[0:2]
 		)
 		
 		# 2nd Distillation
-		self.facet3 = Facet(self, 5, 'Origin')
-		self.facet4 = Facet(self, 6, 'Duration')
+		self.facets.append(Facet(self, 5, 'Origin'))
+		self.facets.append(Facet(self, 6, 'Duration'))
 		
 		self.distiller2 = Distiller(self, 7, '2nd Distillation',
-			(self.facet3, self.facet4)
+			self.facets[2:4]
 		)
 		
 		# 3rd Distillation
-		self.facet5 = Facet(self, 10, 'Area of Effect')
+		self.facets.append(Facet(self, 10, 'Area of Effect'))
 		
 		self.extraFacetButton = ttk.Button(self, text='+', command=self.addExtraFacet, width=3)
 		self.extraFacetButton.grid(column=1, row=19)
 		
 		self.distiller3 = Distiller(self, 20, 'Final Distillation',
-			(self.distiller1, self.distiller2, self.facet5, self.extraFacets),
-			round='true'
+			(self.distiller1, self.distiller2, self.facets[4:]),
+			final=True
 		)
 		
 		# Sigils
@@ -471,12 +712,12 @@ class App(ttk.Frame):
 		
 		self.minorisCombobox = ttk.Combobox(self, textvariable=self.minorisValue, width=2)
 		self.minorisCombobox.state(['readonly'])
-		self.minorisCombobox['values'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		self.minorisCombobox['values'] = generateRange(0, 10)
 		self.minorisCombobox.bind('<<ComboboxSelected>>', self.updateAll)
 		self.minorisCombobox.grid(column=5, row=25, sticky=W)
 		
 		# Adjustments - Majoris Sigil(S)
-		self.majorisSigils.append(MajorisSigil(self, self.extraFacetRow))
+		self.majorisSigils.append(MajorisSigil(self, self.majorisStartRow))
 		
 		# Adjustments - Compress & Extend		
 		self.compressLabel = ttk.Label(self, text='Compressions')
@@ -484,7 +725,7 @@ class App(ttk.Frame):
 		
 		self.compressCombobox = ttk.Combobox(self, textvariable=self.compressValue, width=2)
 		self.compressCombobox.state(['readonly'])
-		self.compressCombobox['values'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		self.compressCombobox['values'] = generateRange(0, 10)
 		self.compressCombobox.bind('<<ComboboxSelected>>', self.updateAll)
 		self.compressCombobox.grid(column=3, row=36, sticky=W)
 		
@@ -493,7 +734,7 @@ class App(ttk.Frame):
 		
 		self.extendCombobox = ttk.Combobox(self, textvariable=self.extendValue, width=2)
 		self.extendCombobox.state(['readonly'])
-		self.extendCombobox['values'] = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		self.extendCombobox['values'] = generateRange(0, 10)
 		self.extendCombobox.bind('<<ComboboxSelected>>', self.updateAll)
 		self.extendCombobox.grid(column=5, row=36, sticky=W)
 		
@@ -520,6 +761,9 @@ class App(ttk.Frame):
 		self.actionsValueLabel = ttk.Label(self, textvariable=self.finalActions)
 		self.actionsValueLabel.grid(column=8, row=38, sticky=(W, E))
 		
+		# Weapon Stats		
+		self.weapon = WeaponStats(self, 39)
+		
 	def __init__(self, master):
 		Frame.__init__(self, master)
 		self.frame = master
@@ -531,8 +775,11 @@ class App(ttk.Frame):
 		self.extendValue.set(0)
 		self.minorisValue = StringVar()
 		self.minorisValue.set(0)
-		self.extraFacetRow = 26
-		self.extraFacets = []
+		self.majorisStartRow = 26
+		self.majorisMaxRows = 10
+		self.extrafacetsMaButartRow = 11
+		self.extraFacetMaxRows = 9
+		self.facets = []
 		self.finalOb = StringVar()
 		self.finalObValue = 1
 		self.finalActions = StringVar()
