@@ -1,7 +1,7 @@
 # Burning Wheel - Spell Burner
 # By 2Shirt (Alan Mason)
 #
-# Version 0.10a
+# Version 0.11a
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
@@ -461,7 +461,6 @@ class WeaponStats():
 				self.vaLabel.grid(column=7, row=self.row+1, sticky=(W, E))
 				self.vaValueLabel = ttk.Label(self.frame, textvariable = self.wVA)
 				self.vaValueLabel.grid(column=8, row=self.row+1, sticky=(W, E))
-				self.frame.configureGrid()
 		else:
 			# hide widgets
 			try:
@@ -478,7 +477,6 @@ class WeaponStats():
 				
 				self.vaLabel.destroy()
 				self.vaValueLabel.destroy()
-				self.frame.configureGrid()
 			except AttributeError:
 				pass
 	
@@ -522,7 +520,7 @@ class WeaponStats():
 				else: #self.tmp['Power'] < 0:
 					self.wPower.set('Will - ' + str(abs(self.tmp['Power'])))
 				self.wRange.set(str(max(0,self.tmp['Range'])) + 'D')
-				self.wVA.set(self.tmp['VA'])
+				self.wVA.set(str(max(0,self.tmp['VA'] + self.frame.majObTotal - self.frame.numMin)))
 			else:
 				self.enabled = False
 		
@@ -556,7 +554,7 @@ class App(ttk.Frame):
 	
 	def addMajorisSigil(self, *args):
 		self.majorisStartRow = self.majorisStartRow + 1
-		if len(self.majorisSigils) < majorisMaxRows:
+		if len(self.majorisSigils) < self.majorisMaxRows:
 			self.majorisSigils.append(MajorisSigil(self, self.majorisStartRow))
 		self.configureGrid()
 	
@@ -568,9 +566,6 @@ class App(ttk.Frame):
 		self.distiller1.updateStats()
 		self.distiller2.updateStats()
 		self.distiller3.updateStats()
-		
-		### Weapon Stats ###
-		self.weapon.updateStats()
 		
 		### Final Spell ###
 		# Init Variables
@@ -669,6 +664,9 @@ class App(ttk.Frame):
 			self.warningLabelText.set(' ')
 		else:
 			self.warningLabelText.set('[HOUSE RULED]')
+		
+		### Weapon Stats ###
+		self.weapon.updateStats()
 		self.configureGrid()
 		
 	def createWidgets(self):
