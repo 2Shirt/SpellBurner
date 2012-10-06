@@ -1,7 +1,20 @@
-# Burning Wheel - Spell Burner
-# By 2Shirt (Alan Mason)
+# Copyright 2012 Alan Mason
 #
-# Version 1.1
+#    Spell Burner is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    Spell Burner is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with Spell Burner.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Spell Burner Version 1.2
+
 from tkinter import *
 from tkinter import ttk
 from math import ceil, floor, log
